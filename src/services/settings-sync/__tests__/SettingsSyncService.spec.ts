@@ -41,16 +41,16 @@ describe("SettingsSyncService", () => {
 			await SettingsSyncService.initialize(mockContext, mockOutputChannel)
 
 			expect(mockGlobalState.setKeysForSync).toHaveBeenCalledWith([
-				"kilo-code.allowedCommands",
-				"kilo-code.deniedCommands",
-				"kilo-code.autoApprovalEnabled",
-				"kilo-code.fuzzyMatchThreshold",
-				"kilo-code.diffEnabled",
-				"kilo-code.directoryContextAddedContext",
-				"kilo-code.language",
-				"kilo-code.customModes",
-				"kilo-code.firstInstallCompleted",
-				"kilo-code.telemetrySetting",
+				"kilo-code-v5.allowedCommands",
+				"kilo-code-v5.deniedCommands",
+				"kilo-code-v5.autoApprovalEnabled",
+				"kilo-code-v5.fuzzyMatchThreshold",
+				"kilo-code-v5.diffEnabled",
+				"kilo-code-v5.directoryContextAddedContext",
+				"kilo-code-v5.language",
+				"kilo-code-v5.customModes",
+				"kilo-code-v5.firstInstallCompleted",
+				"kilo-code-v5.telemetrySetting",
 			])
 			expect(mockOutputChannel.appendLine).toHaveBeenCalledWith(
 				expect.stringContaining("[SettingsSyncService] Registered 10 keys for synchronization"),
@@ -81,7 +81,7 @@ describe("SettingsSyncService", () => {
 
 			expect(mockConfiguration.get).toHaveBeenCalledWith("enableSettingsSync", true)
 			expect(mockGlobalState.setKeysForSync).toHaveBeenCalledWith(
-				expect.arrayContaining(["kilo-code.allowedCommands", "kilo-code.deniedCommands"]),
+				expect.arrayContaining(["kilo-code-v5.allowedCommands", "kilo-code-v5.deniedCommands"]),
 			)
 		})
 
@@ -94,7 +94,7 @@ describe("SettingsSyncService", () => {
 			await SettingsSyncService.initialize(mockContext)
 
 			expect(mockGlobalState.setKeysForSync).toHaveBeenCalledWith(
-				expect.arrayContaining(["kilo-code.allowedCommands"]),
+				expect.arrayContaining(["kilo-code-v5.allowedCommands"]),
 			)
 		})
 	})
@@ -120,16 +120,16 @@ describe("SettingsSyncService", () => {
 			const syncKeys = SettingsSyncService.getSyncKeys()
 
 			expect(syncKeys).toEqual([
-				"kilo-code.allowedCommands",
-				"kilo-code.deniedCommands",
-				"kilo-code.autoApprovalEnabled",
-				"kilo-code.fuzzyMatchThreshold",
-				"kilo-code.diffEnabled",
-				"kilo-code.directoryContextAddedContext",
-				"kilo-code.language",
-				"kilo-code.customModes",
-				"kilo-code.firstInstallCompleted",
-				"kilo-code.telemetrySetting",
+				"kilo-code-v5.allowedCommands",
+				"kilo-code-v5.deniedCommands",
+				"kilo-code-v5.autoApprovalEnabled",
+				"kilo-code-v5.fuzzyMatchThreshold",
+				"kilo-code-v5.diffEnabled",
+				"kilo-code-v5.directoryContextAddedContext",
+				"kilo-code-v5.language",
+				"kilo-code-v5.customModes",
+				"kilo-code-v5.firstInstallCompleted",
+				"kilo-code-v5.telemetrySetting",
 			])
 		})
 	})

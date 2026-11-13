@@ -212,7 +212,7 @@ export class GeminiHandler extends BaseProvider implements SingleCompletionHandl
 		const config: GenerateContentConfig = {
 			systemInstruction,
 			httpOptions: this.options.googleGeminiBaseUrl ? { baseUrl: this.options.googleGeminiBaseUrl } : undefined,
-			thinkingConfig,
+			thinkingConfig: thinkingConfig as any,
 			maxOutputTokens,
 			temperature: temperatureConfig,
 			...(tools.length > 0 ? { tools } : {}),
@@ -445,7 +445,7 @@ export class GeminiHandler extends BaseProvider implements SingleCompletionHandl
 		}
 
 		return chunks
-			.map((chunk): GroundingSource | null => {
+			.map((chunk: any): GroundingSource | null => {
 				const uri = chunk.web?.uri
 				const title = chunk.web?.title || uri || "Unknown Source"
 
@@ -457,7 +457,7 @@ export class GeminiHandler extends BaseProvider implements SingleCompletionHandl
 				}
 				return null
 			})
-			.filter((source): source is GroundingSource => source !== null)
+			.filter((source: any): source is GroundingSource => source !== null)
 	}
 
 	private extractCitationsOnly(groundingMetadata?: GroundingMetadata): string | null {

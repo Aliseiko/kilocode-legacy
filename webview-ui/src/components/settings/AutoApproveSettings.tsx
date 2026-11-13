@@ -29,6 +29,7 @@ type AutoApproveSettingsProps = HTMLAttributes<HTMLDivElement> & {
 	alwaysAllowMcp?: boolean
 	alwaysAllowModeSwitch?: boolean
 	alwaysAllowSubtasks?: boolean
+	alwaysApproveResubmit?: boolean
 	alwaysAllowExecute?: boolean
 	alwaysAllowFollowupQuestions?: boolean
 	followupAutoApproveTimeoutMs?: number
@@ -50,6 +51,7 @@ type AutoApproveSettingsProps = HTMLAttributes<HTMLDivElement> & {
 		| "alwaysAllowMcp"
 		| "alwaysAllowModeSwitch"
 		| "alwaysAllowSubtasks"
+		| "alwaysApproveResubmit"
 		| "alwaysAllowExecute"
 		| "alwaysAllowFollowupQuestions"
 		| "followupAutoApproveTimeoutMs"
@@ -90,7 +92,16 @@ export const AutoApproveSettings = ({
 	const { t } = useAppTranslation()
 	const [commandInput, setCommandInput] = useState("")
 	const [deniedCommandInput, setDeniedCommandInput] = useState("")
-	const { autoApprovalEnabled, setAutoApprovalEnabled, listApiConfigMeta } = useExtensionState() // kilocode_change: Add listApiConfigMeta for gatekeeper
+	const {
+		autoApprovalEnabled,
+		setAutoApprovalEnabled,
+		listApiConfigMeta,
+		alwaysApproveResubmit,
+		requestDelaySeconds,
+		requestRetryMax,
+		setRequestRetryMax,
+		setRequestDelaySeconds,
+	} = useExtensionState() // kilocode_change: Add listApiConfigMeta for gatekeeper
 
 	const toggles = useAutoApprovalToggles()
 
@@ -199,6 +210,7 @@ export const AutoApproveSettings = ({
 						alwaysAllowMcp={alwaysAllowMcp}
 						alwaysAllowModeSwitch={alwaysAllowModeSwitch}
 						alwaysAllowSubtasks={alwaysAllowSubtasks}
+						alwaysApproveResubmit={alwaysApproveResubmit}
 						alwaysAllowExecute={alwaysAllowExecute}
 						alwaysAllowFollowupQuestions={alwaysAllowFollowupQuestions}
 						onToggle={(key, value) => setCachedStateField(key, value)}
@@ -311,6 +323,67 @@ export const AutoApproveSettings = ({
 								{t("settings:autoApprove.followupQuestions.timeoutLabel")}
 							</div>
 						</SearchableSetting>
+					</div>
+				)}
+
+				{alwaysApproveResubmit && (
+					<div className="flex flex-col gap-3 pl-3 border-l-2 border-vscode-button-background">
+						<div className="flex items-center gap-4 font-bold">
+							<span className="codicon codicon-refresh" />
+							<div>Retry</div>
+						</div>
+						<div className="space-y-4">
+							<div className="flex gap-4">
+								<div className="flex-1">
+									<div className="flex items-center gap-2">
+										<Slider
+											min={1}
+											max={60}
+											step={1}
+											className="grow"
+											value={[requestDelaySeconds ?? 10]}
+											onValueChange={([value]) => {
+												setRequestDelaySeconds(value)
+												vscode.postMessage({
+													type: "updateSettings",
+													updatedSettings: { requestDelaySeconds: value },
+												})
+											}}
+										/>
+										<span className="w-12 text-right">{requestDelaySeconds ?? 10}s</span>
+									</div>
+									<div className="text-vscode-descriptionForeground text-sm mt-1">
+										Base delay between retries (seconds)
+									</div>
+								</div>
+								<div className="flex-1">
+									<div className="flex items-center gap-2">
+										<Slider
+											min={0}
+											max={100}
+											step={1}
+											className="grow"
+											value={[requestRetryMax ?? 0]}
+											onValueChange={([value]) => {
+												setRequestRetryMax(value)
+												vscode.postMessage({
+													type: "updateSettings",
+													updatedSettings: { requestRetryMax: value },
+												})
+											}}
+										/>
+										<span className="w-12 text-right">
+											{requestRetryMax === 0 || requestRetryMax === undefined
+												? "∞"
+												: requestRetryMax}
+										</span>
+									</div>
+									<div className="text-vscode-descriptionForeground text-sm mt-1">
+										Maximum auto-retries for API requests
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				)}
 

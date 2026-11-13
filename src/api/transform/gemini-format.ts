@@ -103,9 +103,29 @@ export function convertAnthropicContentToGemini(
 				}
 
 				if (typeof block.content === "string") {
-					return {
-						functionResponse: { name: toolName, response: { name: toolName, content: block.content } },
+					const envTag = "<environment_details>"
+					const envIndex = block.content.indexOf(envTag)
+					if (envIndex !== -1) {
+						const toolOutput = block.content.slice(0, envIndex).trim()
+						const envDetails = block.content.slice(envIndex).trim()
+						return [
+							{
+								functionResponse: {
+									name: toolName,
+									id: block.tool_use_id,
+									response: { output: toolOutput || "(tool output)" },
+								},
+							},
+							{ text: envDetails },
+						] as Part[]
 					}
+					return {
+						functionResponse: {
+							name: toolName,
+							id: block.tool_use_id,
+							response: { output: block.content },
+						},
+					} as Part
 				}
 
 				if (!Array.isArray(block.content)) {
@@ -125,12 +145,39 @@ export function convertAnthropicContentToGemini(
 				}
 
 				// Create content text with a note about images if present
-				const contentText =
-					textParts.join("\n\n") + (imageParts.length > 0 ? "\n\n(See next part for image)" : "")
+				const fullText = textParts.join("\n\n")
+				const envTag = "<environment_details>"
+				const envIndex = fullText.indexOf(envTag)
+
+				if (envIndex !== -1) {
+					const toolOutput = fullText.slice(0, envIndex).trim()
+					const envDetails = fullText.slice(envIndex).trim()
+					return [
+						{
+							functionResponse: {
+								id: block.tool_use_id,
+								name: toolName,
+								response: {
+									output: toolOutput + (imageParts.length > 0 ? "\n\n(See next part for image)" : ""),
+								},
+							},
+						},
+						{ text: envDetails },
+						...imageParts,
+					]
+				}
+
+				const contentText = fullText + (imageParts.length > 0 ? "\n\n(See next part for image)" : "")
 
 				// Return function response followed by any images
 				return [
-					{ functionResponse: { name: toolName, response: { name: toolName, content: contentText } } },
+					{
+						functionResponse: {
+							id: block.tool_use_id,
+							name: toolName,
+							response: { output: contentText },
+						},
+					},
 					...imageParts,
 				]
 			}

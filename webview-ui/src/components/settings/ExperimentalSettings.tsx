@@ -1,3 +1,4 @@
+import { VSCodeCheckbox } from "@vscode/webview-ui-toolkit/react"
 import React, { HTMLAttributes } from "react"
 
 import type { Experiments, ImageGenerationProvider } from "@roo-code/types"
@@ -82,6 +83,28 @@ export const ExperimentalSettings = ({
 						const experimentKey = config[0]
 						const label = t(`settings:experimental.${experimentKey}.name`)
 
+            if (config[0] === "RAW_SYSTEM_PROMPT") {
+							return (
+								<SearchableSetting
+									key={config[0]}
+									settingId={`experimental-${config[0].toLowerCase()}`}
+									section="experimental"
+									label="Use raw system prompt">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <VSCodeCheckbox checked={experiments[EXPERIMENT_IDS.RAW_SYSTEM_PROMPT] ?? false} onChange={(e: any) => {
+                        setExperimentEnabled(EXPERIMENT_IDS.RAW_SYSTEM_PROMPT, e.target.checked)
+                      }}>
+                        <span className="font-medium">Use raw system prompt</span>
+                      </VSCodeCheckbox>
+                    </div>
+                    <p className="text-vscode-descriptionForeground text-sm mt-0">
+                      When enabled, Kilo Code will attempt to load the system prompt from ~/.kilocode/systems/ if it exists.
+                    </p>
+                  </div>
+								</SearchableSetting>
+							)
+						}
 						if (config[0] === "MULTI_FILE_APPLY_DIFF") {
 							return (
 								<SearchableSetting

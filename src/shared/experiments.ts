@@ -1,6 +1,7 @@
 import type { AssertEqual, Equals, Keys, Values, ExperimentId, Experiments } from "@roo-code/types"
 
 export const EXPERIMENT_IDS = {
+	RAW_SYSTEM_PROMPT: "rawSystemPrompt",
 	MORPH_FAST_APPLY: "morphFastApply", // kilocode_change
 	SPEECH_TO_TEXT: "speechToText", // kilocode_change
 	MULTI_FILE_APPLY_DIFF: "multiFileApplyDiff",
@@ -21,6 +22,7 @@ interface ExperimentConfig {
 }
 
 export const experimentConfigsMap: Record<ExperimentKey, ExperimentConfig> = {
+	RAW_SYSTEM_PROMPT: { enabled: false },
 	MORPH_FAST_APPLY: { enabled: false }, // kilocode_change
 	SPEECH_TO_TEXT: { enabled: true }, // kilocode_change
 	MULTI_FILE_APPLY_DIFF: { enabled: false },

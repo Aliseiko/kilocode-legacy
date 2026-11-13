@@ -4,8 +4,6 @@ import { ClineProvider } from "../../webview/ClineProvider"
 import { t } from "../../../i18n"
 import { WebviewMessage } from "../../../shared/WebviewMessage"
 import { Task } from "../../task/Task"
-import axios from "axios"
-import { getKiloUrlFromToken } from "@roo-code/types"
 import { buildApiHandler } from "../../../api"
 import { ContextProxy } from "../../config/ContextProxy"
 
@@ -46,55 +44,15 @@ interface FetchNotificationsResult {
  * Can be used both from webview handler and standalone startup
  */
 export async function fetchKilocodeNotificationsCore(
-	kilocodeToken: string,
-	dismissedNotificationIds: string[] = [],
-	kilocodeTesterWarningsDisabledUntil?: number,
-	log?: (message: string) => void,
+	_kilocodeToken: string,
+	_dismissedNotificationIds: string[] = [],
+	_kilocodeTesterWarningsDisabledUntil?: number,
+	_log?: (message: string) => void,
 ): Promise<FetchNotificationsResult> {
-	const headers: Record<string, string> = {
-		Authorization: `Bearer ${kilocodeToken}`,
-		"Content-Type": "application/json",
-	}
-
-	// Add X-KILOCODE-TESTER: SUPPRESS header if the setting is enabled
-	if (kilocodeTesterWarningsDisabledUntil && kilocodeTesterWarningsDisabledUntil > Date.now()) {
-		headers["X-KILOCODE-TESTER"] = "SUPPRESS"
-	}
-
-	const url = getKiloUrlFromToken("https://api.kilo.ai/api/users/notifications", kilocodeToken)
-	const response = await axios.get(url, {
-		headers,
-		timeout: 5000,
-	})
-
-	const notifications: KilocodeNotification[] = response.data?.notifications || []
-
-	// Filter notifications for native display (not dismissed and not already shown)
-	const nativeNotifications = notifications.filter(
-		(notification) =>
-			!dismissedNotificationIds.includes(notification.id) &&
-			!shownNativeNotificationIds.has(notification.id) &&
-			(notification.showIn ?? []).includes("extension-native"),
-	)
-
-	// Filter notifications for webview display
-	const webviewNotifications = notifications.filter(({ showIn }) => !showIn || showIn.includes("extension"))
-
-	webviewNotifications.splice(0, 0, {
-		id: "kilo-new-extension-beta-march-11",
-		title: "We've completely rebuilt the Kilo Code extension for VS Code.",
-		message:
-			"Subagent delegation, parallel execution, and the full power of the CLI\u2014now inside your editor. Try it now.",
-		action: {
-			actionText: "Learn more",
-			actionURL: "https://blog.kilo.ai/p/we-completely-rebuilt-the-kilo-vs-code-extension",
-		},
-		showIn: ["extension"],
-	})
-
+	// Standalone v5 build: remote update/EOL notifications and v7 promotion banners are disabled.
 	return {
-		notifications: webviewNotifications,
-		nativeNotifications,
+		notifications: [],
+		nativeNotifications: [],
 	}
 }
 
@@ -229,38 +187,11 @@ const resendMessageSequence = async (
 }
 
 export const fetchKilocodeNotificationsHandler = async (provider: ClineProvider) => {
-	try {
-		const { apiConfiguration, dismissedNotificationIds } = await provider.getState()
-		const kilocodeToken = apiConfiguration?.kilocodeToken
-
-		if (!kilocodeToken || apiConfiguration?.apiProvider !== "kilocode") {
-			provider.postMessageToWebview({
-				type: "kilocodeNotificationsResponse",
-				notifications: [],
-			})
-			return
-		}
-
-		const { notifications, nativeNotifications } = await fetchKilocodeNotificationsCore(
-			kilocodeToken,
-			dismissedNotificationIds || [],
-			apiConfiguration.kilocodeTesterWarningsDisabledUntil,
-			provider.log.bind(provider),
-		)
-
-		provider.postMessageToWebview({
-			type: "kilocodeNotificationsResponse",
-			notifications,
-		})
-
-		await displayNativeNotifications(nativeNotifications, provider.log.bind(provider))
-	} catch (error: any) {
-		provider.log(`Error fetching Kilocode notifications: ${error.message}`)
-		provider.postMessageToWebview({
-			type: "kilocodeNotificationsResponse",
-			notifications: [],
-		})
-	}
+	// Standalone v5 build: do not fetch remote notifications or show v7 upgrade banners.
+	provider.postMessageToWebview({
+		type: "kilocodeNotificationsResponse",
+		notifications: [],
+	})
 }
 
 export const editMessageHandler = async (provider: ClineProvider, message: WebviewMessage) => {

@@ -331,8 +331,12 @@ function getSafeFallbackShell(): string {
 // 5) Publicly Exposed Shell Getter
 // -----------------------------------------------------
 
-export function getShell(): string {
+export function getShell(terminalShellIntegrationDisabled?: boolean): string {
 	let shell: string | null = null
+
+  if (terminalShellIntegrationDisabled) {
+  	return process.platform === "win32" ? SHELL_PATHS.CMD : SHELL_PATHS.SH
+  }
 
 	// 1. Check VS Code config first.
 	if (process.platform === "win32") {

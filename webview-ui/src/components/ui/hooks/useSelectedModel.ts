@@ -14,6 +14,8 @@ import {
 	geminiModels,
 	geminiDefaultModelId,
 	// kilocode_change start
+	geminiCliDefaultModelId,
+	geminiCliModels,
 	syntheticDefaultModelId,
 	ovhCloudAiEndpointsDefaultModelId,
 	inceptionDefaultModelId,
@@ -476,6 +478,11 @@ function getSelectedModel({
 				id: invalidOrDefaultModel,
 				info: routerModels["kilocode"][invalidOrDefaultModel],
 			}
+		}
+		case "gemini-cli": {
+			const id = apiConfiguration.apiModelId ?? geminiCliDefaultModelId
+			const info = geminiCliModels[id as keyof typeof geminiCliModels]
+			return { id, info }
 		}
 		case "virtual-quota-fallback": {
 			if (virtualQuotaActiveModel) {

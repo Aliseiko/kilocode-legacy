@@ -8,6 +8,7 @@ import type { Keys, Equals, AssertEqual } from "./type-fu.js"
 
 const kilocodeExperimentIds = ["morphFastApply", "speechToText"] as const // kilocode_change
 export const experimentIds = [
+	"rawSystemPrompt",
 	"powerSteering",
 	"multiFileApplyDiff",
 	"preventFocusDisruption",
@@ -26,6 +27,7 @@ export type ExperimentId = z.infer<typeof experimentIdsSchema>
  */
 
 export const experimentsSchema = z.object({
+	rawSystemPrompt: z.boolean().optional(),
 	morphFastApply: z.boolean().optional(), // kilocode_change
 	speechToText: z.boolean().optional(), // kilocode_change
 	powerSteering: z.boolean().optional(),

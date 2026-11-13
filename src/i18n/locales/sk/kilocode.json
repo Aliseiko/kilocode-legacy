@@ -138,8 +138,8 @@
 			"tooltip": {
 				"basic": "Kilo Code Autocomplete",
 				"disabled": "Kilo Code Autocomplete (zakázané)",
-				"noCredits": "**Na tvojom účte nie sú žiadne kredity**\n\nTvoj účet Kilo Code nemá žiadne kredity. Pre použitie automatického doplňovania prosím pridaj kredity na svoj účet.\n\n[Otvoriť Nastavenia](command:kilo-code.settingsButtonClicked)",
-				"noUsableProvider": "**Nie je nakonfigurovaný žiadny model automatického doplňovania**\n\nPre povolenie automatického doplňovania pridaj profil s jedným z týchto podporovaných poskytovateľov: {{providers}}.\n\n[Otvoriť Nastavenia](command:kilo-code.settingsButtonClicked)",
+				"noCredits": "**Na tvojom účte nie sú žiadne kredity**\n\nTvoj účet Kilo Code nemá žiadne kredity. Pre použitie automatického doplňovania prosím pridaj kredity na svoj účet.\n\n[Otvoriť Nastavenia](command:kilo-code-v5.settingsButtonClicked)",
+				"noUsableProvider": "**Nie je nakonfigurovaný žiadny model automatického doplňovania**\n\nPre povolenie automatického doplňovania pridaj profil s jedným z týchto podporovaných poskytovateľov: {{providers}}.\n\n[Otvoriť Nastavenia](command:kilo-code-v5.settingsButtonClicked)",
 				"sessionTotal": "Celkové náklady relácie:",
 				"provider": "Poskytovateľ:",
 				"model": "Model:",

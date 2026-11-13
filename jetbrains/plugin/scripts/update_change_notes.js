@@ -2,7 +2,7 @@
 
 import { readFileSync, writeFileSync } from "fs"
 import { join, dirname } from "path"
-import { fileURLToPath } from "url"
+import { fileURLToPath, pathToFileURL } from "url"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -147,7 +147,7 @@ function escapeHtml(text) {
 }
 
 // Run the update if this script is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 	updateChangeNotes()
 }
 

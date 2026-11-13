@@ -1,3 +1,6 @@
+import * as os from "os"
+import { fileExistsAtPath } from '../../utils/fs'
+import { safeReadFile } from '../prompts/sections/custom-system-prompt'
 import path from "path"
 
 import type OpenAI from "openai"
@@ -101,6 +104,17 @@ export async function buildNativeToolsArrayWithRestrictions(options: BuildToolsO
 		diffEnabled,
 		includeAllToolsWithRestrictions,
 	} = options
+
+  if (experiments?.rawSystemPrompt) {
+    const systemPath = path.join(os.homedir(), ".kilocode", "systems")
+    const systemRolePath = path.join(systemPath, `00-tools.json`)
+
+    if (await fileExistsAtPath(systemRolePath)) {
+      const readTools = await safeReadFile(systemRolePath)
+      const tools = (() => { try { return JSON.parse(readTools) } catch { return {} } })()
+      if (Object.keys(tools).length > 0) return { tools }
+    }
+  }
 
 	const mcpHub = provider.getMcpHub()
 

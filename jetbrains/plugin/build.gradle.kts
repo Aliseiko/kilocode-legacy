@@ -156,7 +156,7 @@ tasks {
     register("generateConfigProperties") {
         description = "Generate properties file containing plugin configuration"
         doLast {
-            val configDir = File("$projectDir/src/main/resources/ai/kilocode/jetbrains/plugin/config")
+            val configDir = File("$projectDir/src/main/resources/ai/kilocode/v5/jetbrains/plugin/config")
             configDir.mkdirs()
 
             val configFile = File(configDir, "plugin.properties")
@@ -223,51 +223,55 @@ tasks {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
         if (ext.get("debugMode") == "idea") {
-            from("${project.projectDir.absolutePath}/src/main/resources/themes/") {
-                into("${ext.get("debugResource")}/${ext.get("vscodePlugin")}/integrations/theme/default-themes/")
-            }
             doLast {
+                val themeSrc = File(projectDir, "src/main/resources/themes")
                 val vscodePluginDir = File("${ext.get("debugResource")}/${ext.get("vscodePlugin")}")
+                val themeDest = File(vscodePluginDir, "integrations/theme/default-themes")
+                themeDest.mkdirs()
+                copy {
+                    from(themeSrc)
+                    into(themeDest)
+                }
                 vscodePluginDir.mkdirs()
                 File(vscodePluginDir, ".env").createNewFile()
             }
         } else if (ext.get("debugMode") != "none") {
             doFirst {
                 // Validate required files exist
-                val vscodePluginDir = File("./plugins/${ext.get("vscodePlugin")}")
+                val vscodePluginDir = File(projectDir, "plugins/${ext.get("vscodePlugin")}")
                 if (!vscodePluginDir.exists()) {
                     throw IllegalStateException("missing plugin dir: ${vscodePluginDir.absolutePath}")
                 }
-                val depfile = File("prodDep.txt")
+                val depfile = File(projectDir, "prodDep.txt")
                 if (!depfile.exists()) {
                     throw IllegalStateException("missing prodDep.txt")
                 }
 
-                // Handle platform.zip for release mode
+                // Handle platform.zip for release mode if present
                 if (ext.get("debugMode") == "release") {
-                    val platformZip = File("platform.zip")
-                    if (!platformZip.exists() || platformZip.length() < 1024 * 1024) {
-                        throw IllegalStateException("platform.zip file does not exist or is smaller than 1MB. This file is supported through git lfs and needs to be obtained through git lfs")
-                    }
-
-                    // Extract platform.zip to the platform subdirectory under the project build directory
-                    val platformDir = File("${layout.buildDirectory.get().asFile}/platform")
-                    platformDir.mkdirs()
-                    copy {
-                        from(zipTree(platformZip))
-                        into(platformDir)
+                    val platformZip = File(projectDir, "platform.zip")
+                    if (platformZip.exists() && platformZip.length() >= 1024 * 1024) {
+                        // Extract platform.zip to the platform subdirectory under the project build directory
+                        val platformDir = File("${layout.buildDirectory.get().asFile}/platform")
+                        platformDir.mkdirs()
+                        copy {
+                            from(zipTree(platformZip))
+                            into(platformDir)
+                        }
                     }
                 }
             }
 
-            val vscodePluginDir = File("./plugins/${ext.get("vscodePlugin")}")
-            val depfile = File("prodDep.txt")
+            val vscodePluginDir = File(projectDir, "plugins/${ext.get("vscodePlugin")}")
+            val depfile = File(projectDir, "prodDep.txt")
             val list = mutableListOf<String>()
 
             // Read dependencies during execution
             doFirst {
-                depfile.readLines().forEach { line ->
-                    list.add(line.substringAfterLast("node_modules/") + "/**")
+                if (depfile.exists()) {
+                    depfile.readLines().forEach { line ->
+                        list.add(line.substringAfterLast("node_modules/") + "/**")
+                    }
                 }
             }
 
@@ -288,17 +292,20 @@ tasks {
             }
 
             // Copy VSCode plugin extension
-            from("${vscodePluginDir.path}/extension") { into("$pluginName/${ext.get("vscodePlugin")}") }
+            from("plugins/${ext.get("vscodePlugin")}/extension") { into("$pluginName/${ext.get("vscodePlugin")}") }
 
             // Copy themes
             from("src/main/resources/themes/") { into("$pluginName/${ext.get("vscodePlugin")}/integrations/theme/default-themes/") }
 
             // Copy platform files for release mode
             if (ext.get("debugMode") == "release") {
-                val platformDir = File("${layout.buildDirectory.get().asFile}/platform")
-                from(File(platformDir, "platform.txt")) { into("$pluginName/") }
-                // Copy platform node_modules last to ensure it takes precedence over host node_modules
-                from(File(platformDir, "node_modules")) { into("$pluginName/node_modules") }
+                val platformDir = layout.buildDirectory.dir("platform").get().asFile
+                if (File(platformDir, "platform.txt").exists()) {
+                    from("build/platform/platform.txt") { into("$pluginName/") }
+                }
+                if (File(platformDir, "node_modules").exists()) {
+                    from("build/platform/node_modules") { into("$pluginName/node_modules") }
+                }
             }
 
             doLast {

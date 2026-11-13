@@ -1732,21 +1732,21 @@ export class ClineProvider
 		// Get platform-specific application data directory
 		let mcpServersDir: string
 		if (process.platform === "win32") {
-			// Windows: %APPDATA%\Kilo-Code\MCP
-			mcpServersDir = path.join(os.homedir(), "AppData", "Roaming", "Kilo-Code", "MCP")
+			// Windows: %APPDATA%\Kilo-Code-v5\MCP
+			mcpServersDir = path.join(os.homedir(), "AppData", "Roaming", "Kilo-Code-v5", "MCP") // kilocode_change
 		} else if (process.platform === "darwin") {
-			// macOS: ~/Documents/Kilo-Code/MCP
-			mcpServersDir = path.join(os.homedir(), "Documents", "Kilo-Code", "MCP")
+			// macOS: ~/Documents/Kilo-Code-v5/MCP
+			mcpServersDir = path.join(os.homedir(), "Documents", "Kilo-Code-v5", "MCP") // kilocode_change
 		} else {
-			// Linux: ~/.local/share/Kilo-Code/MCP
-			mcpServersDir = path.join(os.homedir(), ".local", "share", "Kilo-Code", "MCP")
+			// Linux: ~/.local/share/Kilo-Code-v5/MCP
+			mcpServersDir = path.join(os.homedir(), ".local", "share", "Kilo-Code-v5", "MCP") // kilocode_change
 		}
 
 		try {
 			await fs.mkdir(mcpServersDir, { recursive: true })
 		} catch (error) {
 			// Fallback to a relative path if directory creation fails
-			return path.join(os.homedir(), ".kilocode", "mcp")
+			return path.join(os.homedir(), ".kilocode-v5", "mcp") // kilocode_change
 		}
 		return mcpServersDir
 	}
@@ -2257,6 +2257,7 @@ export class ClineProvider
 			enhancementApiConfigId,
 			commitMessageApiConfigId, // kilocode_change
 			terminalCommandApiConfigId, // kilocode_change
+			requestRetryMax,
 			autoApprovalEnabled,
 			customModes,
 			experiments,
@@ -2297,6 +2298,7 @@ export class ClineProvider
 			dismissedNotificationIds, // kilocode_change
 			morphApiKey, // kilocode_change
 			fastApplyModel, // kilocode_change: Fast Apply model selection
+			alwaysApproveResubmit,
 			fastApplyApiProvider, // kilocode_change: Fast Apply model api base url
 			alwaysAllowFollowupQuestions,
 			followupAutoApproveTimeoutMs,
@@ -2386,6 +2388,7 @@ export class ClineProvider
 			alwaysAllowMcp: alwaysAllowMcp ?? false,
 			alwaysAllowModeSwitch: alwaysAllowModeSwitch ?? false,
 			alwaysAllowSubtasks: alwaysAllowSubtasks ?? false,
+			alwaysApproveResubmit: alwaysApproveResubmit ?? true,
 			isBrowserSessionActive,
 			yoloMode: yoloMode ?? false, // kilocode_change
 			allowedMaxRequests,
@@ -2533,6 +2536,8 @@ export class ClineProvider
 			includeCurrentTime: includeCurrentTime ?? true,
 			includeCurrentCost: includeCurrentCost ?? true,
 			maxGitStatusFiles: maxGitStatusFiles ?? 0,
+			requestDelaySeconds: requestDelaySeconds ?? 10,
+			requestRetryMax: requestRetryMax ?? 0,
 			taskSyncEnabled,
 			remoteControlEnabled,
 			imageGenerationProvider,
@@ -2709,6 +2714,9 @@ export class ClineProvider
 			alwaysAllowModeSwitch: stateValues.alwaysAllowModeSwitch ?? true,
 			alwaysAllowSubtasks: stateValues.alwaysAllowSubtasks ?? true,
 			alwaysAllowFollowupQuestions: stateValues.alwaysAllowFollowupQuestions ?? false,
+			alwaysApproveResubmit: stateValues.alwaysApproveResubmit ?? true,
+			requestDelaySeconds: stateValues.requestDelaySeconds ?? 10,
+			requestRetryMax: stateValues.requestRetryMax ?? 0,
 			isBrowserSessionActive,
 			yoloMode: stateValues.yoloMode ?? false, // kilocode_change
 			followupAutoApproveTimeoutMs: stateValues.followupAutoApproveTimeoutMs ?? 60000,

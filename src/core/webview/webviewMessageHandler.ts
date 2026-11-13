@@ -114,12 +114,8 @@ import { SessionManager } from "../../shared/kilocode/cli-sessions/core/SessionM
 import { getEffectiveTelemetrySetting } from "../kilocode/wrapper"
 
 async function switchToPreRelease() {
-	await vscode.commands.executeCommand("workbench.extensions.installExtension", "kilocode.kilo-code", {
-		installPreReleaseVersion: true,
-	})
-	vscode.window.showInformationMessage(
-		"Switching to the pre-release channel. VS Code will prompt you to reload once the update is installed.",
-	)
+	// Standalone v5 build: do not switch to or install the v7 marketplace extension.
+	vscode.window.showInformationMessage("Kilo Code v5 is a standalone build and does not auto-switch to v7.")
 }
 
 export const webviewMessageHandler = async (
@@ -735,6 +731,12 @@ export const webviewMessageHandler = async (
 						if (!value) {
 							continue
 						}
+					} else if (
+						key === "alwaysApproveResubmit" ||
+						key === "requestRetryMax" ||
+						key === "requestDelaySeconds"
+					) {
+						newValue = value
 					}
 
 					await provider.contextProxy.setValue(key as keyof RooCodeSettings, newValue)
@@ -1766,7 +1768,7 @@ export const webviewMessageHandler = async (
 			break
 		// kilocode_change begin
 		case "openGlobalKeybindings":
-			vscode.commands.executeCommand("workbench.action.openGlobalKeybindings", message.text ?? "kilo-code.")
+			vscode.commands.executeCommand("workbench.action.openGlobalKeybindings", message.text ?? `${Package.name}.`)
 			break
 		case "showSystemNotification":
 			const isSystemNotificationsEnabled = getGlobalState("systemNotificationsEnabled") ?? true
@@ -2104,7 +2106,7 @@ export const webviewMessageHandler = async (
 			const validatedSettings = autocompleteServiceSettingsSchema.parse(message.values)
 			await updateGlobalState("ghostServiceSettings", validatedSettings)
 			await provider.postStateToWebview()
-			vscode.commands.executeCommand("kilo-code.autocomplete.reload")
+			vscode.commands.executeCommand(`${Package.name}.autocomplete.reload`)
 			break
 		case "snoozeAutocomplete":
 			if (typeof message.value === "number" && message.value > 0) {
@@ -2354,7 +2356,7 @@ export const webviewMessageHandler = async (
 					await provider.providerSettingsManager.saveConfig(message.text, message.apiConfiguration)
 					const listApiConfig = await provider.providerSettingsManager.listConfig()
 					await updateGlobalState("listApiConfigMeta", listApiConfig)
-					vscode.commands.executeCommand("kilo-code.autocomplete.reload") // kilocode_change: Reload autocomplete model when API provider settings change
+					vscode.commands.executeCommand(`${Package.name}.autocomplete.reload`) // kilocode_change: Reload autocomplete model when API provider settings change
 				} catch (error) {
 					provider.log(
 						`Error save api configuration: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`,
@@ -2417,7 +2419,7 @@ export const webviewMessageHandler = async (
 				const currentApiConfigName = getGlobalState("currentApiConfigName") || "default"
 				const isActiveProfile = message.text === currentApiConfigName
 				await provider.upsertProviderProfile(message.text, configToSave, isActiveProfile) // Activate if it's the current active profile
-				vscode.commands.executeCommand("kilo-code.autocomplete.reload")
+				vscode.commands.executeCommand(`${Package.name}.autocomplete.reload`)
 				// kilocode_change end
 
 				// Ensure state is posted to webview after profile update to reflect organization mode changes
@@ -2426,7 +2428,7 @@ export const webviewMessageHandler = async (
 				}
 
 				// kilocode_change: Reload autocomplete model when API provider settings change
-				vscode.commands.executeCommand("kilo-code.autocomplete.reload")
+				vscode.commands.executeCommand(`${Package.name}.autocomplete.reload`)
 			}
 			// kilocode_change end: check for kilocodeToken change to remove organizationId and fetch organization modes
 			break
@@ -2453,7 +2455,7 @@ export const webviewMessageHandler = async (
 					await provider.activateProviderProfile({ name: newName })
 
 					// kilocode_change: Reload autocomplete model when API provider settings change
-					vscode.commands.executeCommand("kilo-code.autocomplete.reload")
+					vscode.commands.executeCommand(`${Package.name}.autocomplete.reload`)
 				} catch (error) {
 					provider.log(
 						`Error rename api configuration: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`,
@@ -2530,7 +2532,7 @@ export const webviewMessageHandler = async (
 					await provider.activateProviderProfile({ name: newName })
 
 					// kilocode_change: Reload autocomplete model when API provider settings change
-					vscode.commands.executeCommand("kilo-code.autocomplete.reload")
+					vscode.commands.executeCommand(`${Package.name}.autocomplete.reload`)
 				} catch (error) {
 					provider.log(
 						`Error delete api configuration: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`,

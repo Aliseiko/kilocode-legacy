@@ -18,6 +18,11 @@ export interface ICommitMessageIntegration {
 	showMessage?(message: string, type: "info" | "error" | "warning"): Promise<void>
 
 	/**
+	 * Get the current value from the IDE's commit input box.
+	 */
+	getCommitInputValue(): Promise<string | undefined>
+
+	/**
 	 * Handle the final result (e.g., set commit message in input box)
 	 */
 	handleResult(result: CommitMessageResult): Promise<void>

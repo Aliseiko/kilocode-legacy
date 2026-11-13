@@ -192,7 +192,16 @@ export class AttemptCompletionTool extends BaseTool<"attempt_completion"> {
 			}
 
 			// User provided feedback - push tool result to continue the conversation
-			await task.say("user_feedback", text ?? "", images)
+			// If we're resuming, the user_feedback message might have already been added to the UI
+			// by Task.resumeTaskFromHistory. We check if the last message in clineMessages is
+			// already a user_feedback with the same text to avoid duplication.
+			const lastMessage = task.clineMessages.at(-1)
+			const isDuplicate =
+				lastMessage?.type === "say" && lastMessage.say === "user_feedback" && lastMessage.text === text
+
+			if (!isDuplicate) {
+				await task.say("user_feedback", text ?? "", images)
+			}
 
 			const feedbackText = `The user has provided feedback on the results. Consider their input to continue the task, and then attempt completion again.\n<feedback>\n${text}\n</feedback>`
 			pushToolResult(formatResponse.toolResult(feedbackText, images))

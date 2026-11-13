@@ -5,6 +5,7 @@ import type { CommandId } from "@roo-code/types"
 import { TelemetryService } from "@roo-code/telemetry"
 
 import { getCommand } from "../utils/commands"
+import { Package } from "../shared/package" // kilocode_change
 import { ClineProvider } from "../core/webview/ClineProvider"
 import { exportSettings } from "../core/config/importExport" // kilocode_change
 import { ContextProxy } from "../core/config/ContextProxy"
@@ -238,7 +239,7 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 	}, // kilocode_change begin
 	focusChatInput: async () => {
 		try {
-			await vscode.commands.executeCommand("kilo-code.SidebarProvider.focus")
+			await vscode.commands.executeCommand(`${Package.name}.SidebarProvider.focus`) // kilocode_change
 			await delay(100)
 
 			let visibleProvider = getVisibleProviderOrLog(outputChannel)

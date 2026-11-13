@@ -277,6 +277,7 @@ describe("mergeExtensionState", () => {
 			...baseState,
 			apiConfiguration: { modelMaxThinkingTokens: 456, modelTemperature: 0.3 },
 			experiments: {
+        rawSystemPrompt: false,
 				powerSteering: true,
 				multiFileApplyDiff: true,
 				preventFocusDisruption: false,

@@ -35,6 +35,7 @@ describe("experiments", () => {
 	describe("isEnabled", () => {
 		it("returns false when POWER_STEERING experiment is not enabled", () => {
 			const experiments: Record<ExperimentId, boolean> = {
+        rawSystemPrompt: false,
 				morphFastApply: false, // kilocode_change
 				speechToText: false, // kilocode_change
 				powerSteering: false,
@@ -50,6 +51,7 @@ describe("experiments", () => {
 
 		it("returns true when experiment POWER_STEERING is enabled", () => {
 			const experiments: Record<ExperimentId, boolean> = {
+        rawSystemPrompt: false,
 				morphFastApply: false, // kilocode_change
 				speechToText: false, // kilocode_change
 				powerSteering: true,
@@ -65,6 +67,7 @@ describe("experiments", () => {
 
 		it("returns false when experiment is not present", () => {
 			const experiments: Record<ExperimentId, boolean> = {
+        rawSystemPrompt: false,
 				morphFastApply: false, // kilocode_change
 				speechToText: false, // kilocode_change
 				powerSteering: false,

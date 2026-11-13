@@ -60,10 +60,13 @@ export class CommitMessageOrchestrator {
 
 			integration.reportProgress?.(70, t("kilocode:commitMessage.generating"))
 
+			const additionalInstructions = await integration.getCommitInputValue?.()
+
 			const message = await messageGenerator.generateMessage({
 				workspacePath: request.workspacePath,
 				selectedFiles: resolution.files,
 				gitContext,
+				additionalInstructions,
 				onProgress: (update) => {
 					if (update.percentage !== undefined) {
 						// Scale AI generation progress to fit within 70-95% range

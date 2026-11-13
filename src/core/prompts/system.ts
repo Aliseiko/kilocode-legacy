@@ -1,3 +1,11 @@
+import osName from "os-name"
+import * as path from "path"
+import { getShell } from "../../utils/shell"
+import { isLanguage } from "@roo-code/types"
+import { LANGUAGES } from "../../shared/language"
+import { fileExistsAtPath } from "../../utils/fs"
+import { safeReadFile } from "./sections/custom-system-prompt"
+import { getSkills } from './sections/skills'
 import * as vscode from "vscode"
 import * as os from "os"
 
@@ -209,6 +217,35 @@ export const SYSTEM_PROMPT = async (
 
 	const mode =
 		getModeBySlug(inputMode, customModes)?.slug || modes.find((m) => m.slug === inputMode)?.slug || defaultModeSlug // kilocode_change: don't try to use non-existent modes
+
+  if (experiments?.rawSystemPrompt) {
+    const systemPath = path.join(os.homedir(), ".kilocode", "systems")
+    const systemRolePath = path.join(systemPath, `role-${mode}.md`)
+
+    if (await fileExistsAtPath(systemRolePath)) {
+      const systemPrompt = (await Promise.all([
+        safeReadFile(systemRolePath),
+        safeReadFile(path.join(systemPath, "01-header.md")),
+        safeReadFile(path.join(systemPath, "02-body.md")),
+        safeReadFile(path.join(systemPath, "03-footer.md")),
+        safeReadFile(path.join(cwd, "agent.md")),
+        safeReadFile(path.join(cwd, "agents.md")),
+      ])).filter(Boolean).join("\n\n").trim()
+
+      const languageIso = language ?? formatLanguage(vscode.env.language)
+      const languageName = isLanguage(languageIso) ? LANGUAGES[languageIso] : languageIso
+      const terminal = getShell(clineProviderState?.terminalShellIntegrationDisabled)
+
+      return systemPrompt
+        .replaceAll("{{OPERATING}}", osName())
+        .replaceAll("{{TERMINAL}}", terminal.toPosix())
+        .replaceAll("{{HOMEDIR}}", os.homedir().toPosix())
+        .replaceAll("{{WORKDIR}}", cwd.toPosix())
+        .replaceAll("{{LANGUAGE}}", `${languageName} (${languageIso})`)
+        .replaceAll("{{CURRENT_MODE}}", mode)
+        .replaceAll("{{SKILL_LIST}}", getSkills(skillsManager, mode))
+    }
+  }
 
 	// Try to load custom system prompt from file
 	const variablesForPrompt: PromptVariables = {

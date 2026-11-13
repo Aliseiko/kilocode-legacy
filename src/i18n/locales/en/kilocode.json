@@ -109,8 +109,8 @@
 			"tooltip": {
 				"basic": "Kilo Code Autocomplete",
 				"disabled": "Kilo Code Autocomplete (disabled)",
-				"noCredits": "**No credits in your account**\n\nYour Kilo Code account has no credits. To use autocomplete, please add credits to your account.\n\n[Open Settings](command:kilo-code.settingsButtonClicked)",
-				"noUsableProvider": "**No autocomplete model configured**\n\nTo enable autocomplete, add a profile with one of these supported providers: {{providers}}.\n\n[Open Settings](command:kilo-code.settingsButtonClicked)",
+				"noCredits": "**No credits in your account**\n\nYour Kilo Code account has no credits. To use autocomplete, please add credits to your account.\n\n[Open Settings](command:kilo-code-v5.settingsButtonClicked)",
+				"noUsableProvider": "**No autocomplete model configured**\n\nTo enable autocomplete, add a profile with one of these supported providers: {{providers}}.\n\n[Open Settings](command:kilo-code-v5.settingsButtonClicked)",
 				"sessionTotal": "Session total cost:",
 				"provider": "Provider:",
 				"model": "Model:",

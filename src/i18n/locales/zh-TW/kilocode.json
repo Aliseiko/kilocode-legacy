@@ -109,8 +109,8 @@
 			"tooltip": {
 				"basic": "Kilo Code Autocomplete",
 				"disabled": "Kilo Code Autocomplete（已停用）",
-				"noCredits": "**帳戶中沒有額度**\n\nKilo Code 帳戶沒有額度。若要使用 Autocomplete，請為帳戶儲值。\n\n[開啟設定](command:kilo-code.settingsButtonClicked)",
-				"noUsableProvider": "**未設定 Autocomplete 模型**\n\n若要啟用 Autocomplete，請新增一個使用以下支援供應商的設定檔：{{providers}}。\n\n[開啟設定](command:kilo-code.settingsButtonClicked)",
+				"noCredits": "**帳戶中沒有額度**\n\nKilo Code 帳戶沒有額度。若要使用 Autocomplete，請為帳戶儲值。\n\n[開啟設定](command:kilo-code-v5.settingsButtonClicked)",
+				"noUsableProvider": "**未設定 Autocomplete 模型**\n\n若要啟用 Autocomplete，請新增一個使用以下支援供應商的設定檔：{{providers}}。\n\n[開啟設定](command:kilo-code-v5.settingsButtonClicked)",
 				"sessionTotal": "工作階段總費用：",
 				"provider": "供應商：",
 				"model": "模型：",

@@ -2,7 +2,7 @@
 
 import { readFileSync } from "fs"
 import { join, dirname } from "path"
-import { fileURLToPath } from "url"
+import { fileURLToPath, pathToFileURL } from "url"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -23,8 +23,8 @@ function getBundleName() {
 
 		const version = gradleVersionMatch[1].trim()
 
-		// Generate the bundle name following the pattern: Kilo Code-{version}.zip
-		const bundleName = `Kilo Code-${version}.zip`
+		// Generate the bundle name following the pattern: Kilo Code v5-{version}.zip
+		const bundleName = `Kilo Code v5-${version}.zip`
 
 		// Output just the filename for CI usage
 		process.stdout.write(bundleName)
@@ -37,7 +37,7 @@ function getBundleName() {
 }
 
 // Run the function if this script is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 	getBundleName()
 }
 

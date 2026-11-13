@@ -41,9 +41,8 @@ export const CommandExecution = ({ executionId, text, icon, title }: CommandExec
 
 	const { command, output: parsedOutput } = useMemo(() => parseCommandAndOutput(text), [text])
 
-	// If we aren't opening the VSCode terminal for this command then we default
-	// to expanding the command execution output.
-	const [isExpanded, setIsExpanded] = useState(terminalShellIntegrationDisabled)
+	// Default to collapsed for terminal output
+	const [isExpanded, setIsExpanded] = useState(false)
 	const [streamingOutput, setStreamingOutput] = useState("")
 	const [status, setStatus] = useState<CommandExecutionStatus | null>(null)
 

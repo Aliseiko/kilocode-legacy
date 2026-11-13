@@ -21,6 +21,7 @@ import {
 	claudeCodeDefaultModelId,
 	qwenCodeDefaultModelId,
 	geminiDefaultModelId,
+	geminiCliDefaultModelId,
 	deepSeekDefaultModelId,
 	moonshotDefaultModelId,
 	// kilocode_change start
@@ -114,6 +115,7 @@ import {
 	VSCodeLM,
 	XAI,
 	// kilocode_change start
+	GeminiCli,
 	VirtualQuotaFallbackProvider,
 	Synthetic,
 	OvhCloudAiEndpoints,
@@ -482,6 +484,7 @@ const ApiOptions = ({
 				// kilocode_change start
 				apertis: { field: "apertisModelId", default: apertisDefaultModelId },
 				kilocode: { field: "kilocodeModel", default: kilocodeDefaultModel },
+				"gemini-cli": { field: "apiModelId", default: geminiCliDefaultModelId },
 				synthetic: { field: "apiModelId", default: syntheticDefaultModelId },
 				ovhcloud: { field: "ovhCloudAiEndpointsModelId", default: ovhCloudAiEndpointsDefaultModelId },
 				inception: { field: "inceptionLabsModelId", default: inceptionDefaultModelId },
@@ -516,7 +519,17 @@ const ApiOptions = ({
 
 		// kilocode_change start
 		// Providers that don't have documentation pages yet
-		const excludedProviders = ["moonshot", "chutes", "cerebras", "litellm", "zai", "qwen-code", "minimax", "oca"]
+		const excludedProviders = [
+			"gemini-cli",
+			"moonshot",
+			"chutes",
+			"cerebras",
+			"litellm",
+			"zai",
+			"qwen-code",
+			"minimax",
+			"oca"
+		]
 
 		// Skip documentation link when the provider is excluded because documentation is not available
 		if (excludedProviders.includes(selectedProvider)) {
@@ -955,6 +968,10 @@ const ApiOptions = ({
 			)}
 
 			{/* kilocode_change start */}
+			{selectedProvider === "gemini-cli" && (
+				<GeminiCli apiConfiguration={apiConfiguration} setApiConfigurationField={setApiConfigurationField} />
+			)}
+
 			{selectedProvider === "virtual-quota-fallback" && (
 				<VirtualQuotaFallbackProvider
 					apiConfiguration={apiConfiguration}

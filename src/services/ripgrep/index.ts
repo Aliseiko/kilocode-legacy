@@ -94,17 +94,33 @@ export async function getBinPath(vscodeAppRoot: string): Promise<string | undefi
 	const universalBinFolder = `bin/${process.platform}-${process.arch}`
 	// kilocode_change end
 
-	return (
+	const foundPath =
 		// kilocode_change start
 		(await checkPath(`node_modules/@vscode/ripgrep-universal/${universalBinFolder}`)) ||
 		(await checkPath(`node_modules.asar.unpacked/@vscode/ripgrep-universal/${universalBinFolder}`)) ||
+		(await checkPath(`node_modules/@vscode/ripgrep-${process.platform}-${process.arch}/bin/`)) ||
 		// kilocode_change end
 		(await checkPath("node_modules/@vscode/ripgrep/bin/")) ||
 		(await checkPath("node_modules/vscode-ripgrep/bin")) ||
 		(await checkPath("node_modules.asar.unpacked/vscode-ripgrep/bin/")) ||
 		(await checkPath("node_modules.asar.unpacked/@vscode/ripgrep/bin/")) ||
 		(await checkBunPath(vscodeAppRoot, binName)) // kilocode_change
-	)
+
+	if (foundPath) {
+		return foundPath
+	}
+
+	try {
+		const result = childProcess.spawnSync(isWindows ? "where" : "which", [binName], { encoding: "utf8" })
+		if (result.status === 0 && result.stdout) {
+			const pathFromPath = result.stdout.split("\n")[0].trim()
+			if (await fileExistsAtPath(pathFromPath)) {
+				return pathFromPath
+			}
+		}
+	} catch {}
+
+	return undefined
 }
 
 async function execRipgrep(bin: string, args: string[]): Promise<string> {

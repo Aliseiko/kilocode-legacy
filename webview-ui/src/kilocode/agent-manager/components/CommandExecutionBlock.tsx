@@ -71,7 +71,7 @@ export const CommandExecutionBlock = memo(
 	({ text, isRunning = false, isLast = false, exitCode, terminalStatus }: CommandExecutionBlockProps) => {
 		const { t } = useTranslation("agentManager")
 		const { command, output: rawOutput } = useMemo(() => parseCommandAndOutput(text), [text])
-		const [isExpanded, setIsExpanded] = useState(true)
+		const [isExpanded, setIsExpanded] = useState(false)
 		const [copied, setCopied] = useState(false)
 
 		const output = useMemo(() => sanitizeOutput(rawOutput), [rawOutput])

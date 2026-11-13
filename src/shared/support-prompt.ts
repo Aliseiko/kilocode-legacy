@@ -194,78 +194,44 @@ Requirements:
 	},
 	// kilocode_change start
 	COMMIT_MESSAGE: {
-		template: `# Conventional Commit Message Generator
-## System Instructions
-You are an expert Git commit message generator that creates conventional commit messages based on staged changes. Analyze the provided git diff output and generate appropriate conventional commit messages following the specification.
+			template: `Review the entire \`git diff\`, then write a single commit message that fully complies with the Conventional Commits v1.0.0 specification.
 
-\${customInstructions}
+Formatting rules:
 
-## CRITICAL: Commit Message Output Rules
-- DO NOT include any internal status indicators or bracketed metadata (e.g. "[Status: Active]", "[Context: Missing]")
-- DO NOT include any task-specific formatting or artifacts from other rules
-- ONLY Generate a clean conventional commit message as specified below
+1. If the diff includes a breaking change, add an exclamation mark (\`!\`) right after the \`type\` (and \`scope\`, if used) — for example, \`type(scope)!:\` — so it's visible in the header, the first line of the message.
+2. Keep the message short and cohesive.
+3. Put it inside a single code block.
+4. Follow the format shown in the example below.
 
-\${gitContext}
+Every message starts with a \`type\` — the kind of change, chosen from the list below — and can optionally include a \`scope\` in parentheses that names the affected part of the project:
 
-## Conventional Commits Format
-Generate commit messages following this exact structure:
+- build: Changes the build system or external dependencies (example scopes: gulp, broccoli, npm)
+- chore: Performs routine maintenance, such as updating libraries, copyright notices, other repository settings, or dependencies
+- ci: Changes continuous integration (CI) configuration files or scripts (example scopes: Travis CI, CircleCI, GitHub Actions)
+- docs: Changes documentation only, such as fixing typos or adding new documentation
+- feat: Introduces a new feature to the codebase
+- fix: Fixes a bug in the codebase
+- perf: Improves performance
+- refactor: Changes code without fixing a bug or adding a new feature
+- style: Changes formatting only, without changing what the code does (e.g., whitespace, missing semicolons)
+- test: Adds missing tests or corrects existing ones
+
+Example:
+
 \`\`\`
-<type>[optional scope]: <description>
-[optional body]
-[optional footer(s)]
+feat(core)!: add multi-factor authentication support
+
+- Remove reading and parsing of existing \`manifest.json\`.
+- Update cookbook to use \`upsert\` method for recipe management.
+- Adjust \`prepare\` script to run only \`husky\` without building.
+
+BREAKING CHANGE: remove the \`login\` endpoint, migrate to OAuth2.
 \`\`\`
 
-### Core Types (Required)
-- **feat**: New feature or functionality (MINOR version bump)
-- **fix**: Bug fix or error correction (PATCH version bump)
+Additional user-provided context: "\${additionalInstructions}".
 
-### Additional Types (Extended)
-- **docs**: Documentation changes only
-- **style**: Code style changes (whitespace, formatting, semicolons, etc.)
-- **refactor**: Code refactoring without feature changes or bug fixes
-- **perf**: Performance improvements
-- **test**: Adding or fixing tests
-- **build**: Build system or external dependency changes
-- **ci**: CI/CD configuration changes
-- **chore**: Maintenance tasks, tooling changes
-- **revert**: Reverting previous commits
-
-### Scope Guidelines
-- Use parentheses: \`feat(api):\`, \`fix(ui):\`
-- Common scopes: \`api\`, \`ui\`, \`auth\`, \`db\`, \`config\`, \`deps\`, \`docs\`
-- For monorepos: package or module names
-- Keep scope concise and lowercase
-
-### Description Rules
-- Use imperative mood ("add" not "added" or "adds")
-- Start with lowercase letter
-- No period at the end
-- Maximum 50 characters
-- Be concise but descriptive
-
-### Body Guidelines (Optional)
-- Start one blank line after description
-- Explain the "what" and "why", not the "how"
-- Wrap at 72 characters per line
-- Use for complex changes requiring explanation
-
-### Footer Guidelines (Optional)
-- Start one blank line after body
-- **Breaking Changes**: \`BREAKING CHANGE: description\`
-
-## Analysis Instructions
-When analyzing staged changes:
-1. Determine Primary Type based on the nature of changes
-2. Identify Scope from modified directories or modules
-3. Craft Description focusing on the most significant change
-4. Determine if there are Breaking Changes
-5. For complex changes, include a detailed body explaining what and why
-6. Add appropriate footers for issue references or breaking changes
-
-For significant changes, include a detailed body explaining the changes.
-
-Return ONLY the commit message in the conventional format, nothing else.`,
-	},
+\${gitContext}`,
+		},
 	// kilocode_change end
 } as const
 

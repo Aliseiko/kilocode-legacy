@@ -14,6 +14,7 @@ export interface GenerateMessageParams {
 	workspacePath: string
 	selectedFiles: string[]
 	gitContext: string
+	additionalInstructions?: string
 	onProgress?: (progress: ProgressUpdate) => void
 }
 
@@ -21,6 +22,7 @@ export interface PromptOptions {
 	customSupportPrompts?: Record<string, string>
 	previousContext?: string
 	previousMessage?: string
+	additionalInstructions?: string
 }
 
 export interface ProgressUpdate {

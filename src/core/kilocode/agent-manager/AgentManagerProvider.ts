@@ -43,6 +43,7 @@ import { extractSessionConfigs, MAX_VERSION_COUNT } from "./multiVersionUtils"
 import { SessionManager } from "../../../shared/kilocode/cli-sessions/core/SessionManager"
 import { WorkspaceGitService } from "./WorkspaceGitService"
 import { SessionTerminalManager } from "./SessionTerminalManager"
+import { Package } from "../../../shared/package"
 import { startSessionMessageSchema, type StartSessionMessage } from "./types"
 import { openImage } from "../../../integrations/misc/image-handler"
 import { getModelsFromCache } from "../../../api/providers/fetchers/modelCache"
@@ -67,7 +68,7 @@ interface StdinAskResponseMessage {
  * Each agent runs as a CLI process using `kilocode --auto --json`.
  */
 export class AgentManagerProvider implements vscode.Disposable {
-	public static readonly viewType = "kilo-code.AgentManagerPanel"
+	public static readonly viewType = `${Package.name}.AgentManagerPanel`
 
 	private panel: vscode.WebviewPanel | undefined
 	private disposables: vscode.Disposable[] = []

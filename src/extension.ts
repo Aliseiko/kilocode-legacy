@@ -54,7 +54,6 @@ import { SettingsSyncService } from "./services/settings-sync/SettingsSyncServic
 import { ManagedIndexer } from "./services/code-index/managed/ManagedIndexer" // kilocode_change
 import { flushModels, getModels, initializeModelCacheRefresh, refreshModels } from "./api/providers/fetchers/modelCache"
 import { kilo_initializeSessionManager } from "./shared/kilocode/cli-sessions/extension/session-manager-utils" // kilocode_change
-import { fetchKilocodeNotificationsOnStartup } from "./core/kilocode/webview/webviewMessageHandlerUtils" // kilocode_change
 
 // kilocode_change start
 async function findKilocodeTokenFromAnyProfile(provider: ClineProvider): Promise<string | undefined> {
@@ -100,7 +99,7 @@ let userInfoHandler: ((data: { userInfo: CloudUserInfo }) => Promise<void>) | un
 // Your extension is activated the very first time the command is executed.
 export async function activate(context: vscode.ExtensionContext) {
 	extensionContext = context
-	outputChannel = vscode.window.createOutputChannel("Kilo-Code")
+	outputChannel = vscode.window.createOutputChannel(Package.outputChannel) // kilocode_change
 	context.subscriptions.push(outputChannel)
 	outputChannel.appendLine(`${Package.name} extension activated - ${JSON.stringify(Package)}`)
 
@@ -385,7 +384,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	if (!context.globalState.get("firstInstallCompleted")) {
 		outputChannel.appendLine("First installation detected, opening Kilo Code sidebar!")
 		try {
-			await vscode.commands.executeCommand("kilo-code.SidebarProvider.focus")
+			await vscode.commands.executeCommand(`${Package.name}.SidebarProvider.focus`)
 
 			outputChannel.appendLine("Opening Kilo Code walkthrough")
 
@@ -393,7 +392,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			// https://discord.com/channels/1349288496988160052/1395865796026040470
 			await vscode.commands.executeCommand(
 				"workbench.action.openWalkthrough",
-				"kilocode.kilo-code#kiloCodeWalkthrough",
+				`${Package.publisher}.${Package.name}#kiloCodeWalkthrough`,
 				false,
 			)
 
@@ -427,14 +426,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		)
 	}
 
-	// kilocode_change start: Fetch Kilo Code notifications on startup
-	try {
-		void fetchKilocodeNotificationsOnStartup(contextProxy, outputChannel.appendLine.bind(outputChannel))
-	} catch (error) {
-		outputChannel.appendLine(
-			`[Notifications] Error fetching notifications on startup: ${error instanceof Error ? error.message : String(error)}`,
-		)
-	}
+	// kilocode_change start: Remote Kilo Code notifications disabled for standalone v5 build
+	// fetchKilocodeNotificationsOnStartup intentionally skipped
 	// kilocode_change end
 
 	// kilocode_change start

@@ -74,6 +74,20 @@ describe("getBinPath", () => {
 		expect(result).toBe(expectedPath)
 	})
 
+	it("should find ripgrep in platform-arch package node_modules/@vscode/ripgrep-<platform>-<arch>/bin/", async () => {
+		const vscodeAppRoot = "/path/to/vscode"
+		const expectedPath = path.join(
+			vscodeAppRoot,
+			`node_modules/@vscode/ripgrep-${process.platform}-${process.arch}/bin/`,
+			binName,
+		)
+
+		mockFileExists.mockImplementation(async (filePath: string) => filePath === expectedPath)
+
+		const result = await getBinPath(vscodeAppRoot)
+		expect(result).toBe(expectedPath)
+	})
+
 	it("should find ripgrep in node_modules/vscode-ripgrep/bin", async () => {
 		const vscodeAppRoot = "/path/to/vscode"
 		const expectedPath = path.join(vscodeAppRoot, "node_modules/vscode-ripgrep/bin", binName)

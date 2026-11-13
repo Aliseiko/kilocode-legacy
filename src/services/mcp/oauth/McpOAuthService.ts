@@ -4,6 +4,7 @@ import { McpAuthorizationDiscovery, AuthorizationServerMetadata } from "./McpAut
 import { McpOAuthBrowserFlow, DEFAULT_AUTH_FLOW_PORT } from "./McpOAuthBrowserFlow"
 import { McpOAuthTokenStorage, OAuthTokens, StoredTokenData } from "./McpOAuthTokenStorage"
 import { generateCodeChallenge, generateCodeVerifier, generateState } from "./utils"
+import { Package } from "../../../shared/package" // kilocode_change
 
 // Buffer time before token expiration to trigger proactive refresh (5 minutes)
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000
@@ -169,7 +170,7 @@ export class McpOAuthService {
 		const redirectUris = [
 			"http://127.0.0.1/",
 			`http://127.0.0.1:${DEFAULT_AUTH_FLOW_PORT}/`,
-			"vscode://kilocode.kilo-code/oauth/callback",
+			`${vscode.env.uriScheme}://${Package.publisher}.${Package.name}/oauth/callback`, // kilocode_change
 		]
 		const clientCredentials = await this.getOrRegisterClient(authServerMetadata, redirectUris, options)
 

@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import "./vscodeGlobals.js"
 import net from "net"
 import start from "../deps/vscode/vs/workbench/api/node/extensionHostProcess.js"
 import { FileRPCProtocolLogger } from "../deps/vscode/vs/workbench/services/extensions/common/fileRPCProtocolLogger.js"

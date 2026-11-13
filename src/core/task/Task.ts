@@ -162,7 +162,6 @@ import { MessageManager } from "../message-manager"
 import { validateAndFixToolResultIds } from "./validateToolResultIds"
 import { deduplicateToolUseBlocks } from "./deduplicateToolUseBlocks"
 
-const MAX_EXPONENTIAL_BACKOFF_SECONDS = 600 // 10 minutes
 const DEFAULT_USAGE_COLLECTION_TIMEOUT_MS = 5000 // 5 seconds
 const FORCED_CONTEXT_REDUCTION_PERCENT = 75 // Keep 75% of context (remove 25%) on context window errors
 const MAX_CONTEXT_WINDOW_RETRIES = 3 // Maximum retries for context window errors
@@ -3031,6 +3030,13 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 							continue
 						}
 
+						// Handle reasoning chunks by resetting userMessageContentReady.
+						// This prevents deadlocks when a response only contains reasoning (thinking)
+						// and no text/tools yet, or when it's interrupted during thinking.
+						if (chunk.type === "reasoning" || chunk.type === "ant_thinking" || chunk.type === "ant_redacted_thinking") {
+							this.userMessageContentReady = false
+						}
+
 						switch (chunk.type) {
 							case "reasoning": {
 								reasoningMessage += chunk.text
@@ -3623,9 +3629,14 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								`[Task#${this.taskId}.${this.instanceId}] Stream failed, will retry: ${streamingFailedMessage}`,
 							)
 
-							// Apply exponential backoff similar to first-chunk errors when auto-resubmit is enabled
+							// Apply backoff similar to first-chunk errors when auto-resubmit is enabled
 							const stateForBackoff = await this.providerRef.deref()?.getState()
-							if (stateForBackoff?.autoApprovalEnabled) {
+							const retryMax = stateForBackoff?.requestRetryMax ?? 0
+							if (
+								stateForBackoff?.autoApprovalEnabled &&
+								stateForBackoff?.alwaysApproveResubmit &&
+								(retryMax === 0 || (currentItem.retryAttempt ?? 0) < retryMax)
+							) {
 								await this.backoffAndAnnounce(currentItem.retryAttempt ?? 0, error)
 
 								// Check if task was aborted during the backoff
@@ -3638,17 +3649,60 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									await this.abortTask()
 									break
 								}
+
+								// Push the same content back onto the stack to retry, incrementing the retry attempt counter
+								stack.push({
+									userContent: currentUserContent,
+									includeFileDetails: false,
+									retryAttempt: (currentItem.retryAttempt ?? 0) + 1,
+								})
+
+								// Continue to retry the request
+								continue
+							} else {
+								// Prompt the user for retry decision if auto-resubmit is disabled or retry limit reached
+								const { response } = await this.ask(
+									"api_req_failed",
+									streamingFailedMessage ||
+										error.message ||
+										"The stream was terminated unexpectedly.",
+								)
+
+								if (response === "yesButtonClicked") {
+									await this.say("api_req_retried")
+
+									// Push the same content back to retry
+									stack.push({
+										userContent: currentUserContent,
+										includeFileDetails: false,
+										retryAttempt: (currentItem.retryAttempt ?? 0) + 1,
+									})
+
+									// Continue to retry the request
+									continue
+								} else {
+									// User declined to retry or task was aborted - fail the task
+									await this.say(
+										"error",
+										streamingFailedMessage ||
+											error.message ||
+											"The stream was terminated unexpectedly and the user declined to retry.",
+									)
+
+									await this.addToApiConversationHistory({
+										role: "assistant",
+										content: [
+											{
+												type: "text",
+												text: `Failure: The stream was terminated unexpectedly: ${streamingFailedMessage || error.message || "Unknown error"}`,
+											},
+										],
+									})
+
+									// End this iteration of recursivelyMakeClineRequests
+									return true
+								}
 							}
-
-							// Push the same content back onto the stack to retry, incrementing the retry attempt counter
-							stack.push({
-								userContent: currentUserContent,
-								includeFileDetails: false,
-								retryAttempt: (currentItem.retryAttempt ?? 0) + 1,
-							})
-
-							// Continue to retry the request
-							continue
 						}
 					}
 				} finally {
@@ -3732,14 +3786,15 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				// tool use since user can exit at any moment and we wouldn't be
 				// able to save the assistant's response.
 
-				// Check if we have any content to process (text or tool uses)
+				// Check if we have any content to process (reasoning, text or tool uses)
+				const hasReasoning = reasoningMessage.length > 0 || antThinkingContent.length > 0
 				const hasTextContent = assistantMessage.length > 0
 
 				const hasToolUses = this.assistantMessageContent.some(
 					(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
 				)
 
-				if (hasTextContent || hasToolUses) {
+				if (hasReasoning || hasTextContent || hasToolUses) {
 					// Reset counter when we get a successful response with content
 					this.consecutiveNoAssistantMessagesCount = 0
 					// Display grounding sources to the user if they exist
@@ -3963,7 +4018,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 					// Check if we should auto-retry or prompt the user
 					// Reuse the state variable from above
-					if (state?.autoApprovalEnabled) {
+					const retryMax = state?.requestRetryMax ?? 0
+					if (
+						state?.autoApprovalEnabled &&
+						state?.alwaysApproveResubmit &&
+						(retryMax === 0 || (currentItem.retryAttempt ?? 0) < retryMax)
+					) {
 						// Auto-retry with backoff - don't persist failure message when retrying
 						await this.backoffAndAnnounce(
 							currentItem.retryAttempt ?? 0,
@@ -4666,7 +4726,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// but uses allowedFunctionNames to restrict which tools can be called.
 		// Other providers (Anthropic, OpenAI, etc.) don't support this feature yet,
 		// so they continue to receive only the filtered tools for the current mode.
-		const supportsAllowedFunctionNames = apiConfiguration?.apiProvider === "gemini"
+		const supportsAllowedFunctionNames = apiConfiguration?.apiProvider === "gemini" || apiConfiguration?.apiProvider === "gemini-cli"
 
 		if (shouldIncludeTools) {
 			const provider = this.providerRef.deref()
@@ -4839,8 +4899,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			}
 			// kilocode_change end
 			// note that this api_req_failed ask is unique in that we only present this option if the api hasn't streamed any content yet (ie it fails on the first chunk due), as it would allow them to hit a retry button. However if the api failed mid-stream, it could be in any arbitrary state where some tools may have executed, so that error is handled differently and requires cancelling the task entirely.
-			if (autoApprovalEnabled) {
-				// Apply shared exponential backoff and countdown UX
+			const retryMax = state?.requestRetryMax ?? 0
+			if (autoApprovalEnabled && state?.alwaysApproveResubmit && (retryMax === 0 || retryAttempt < retryMax)) {
+				// Apply shared backoff and countdown UX
 				await this.backoffAndAnnounce(retryAttempt, error)
 
 				// CRITICAL: Check if task was aborted during the backoff countdown
@@ -4908,20 +4969,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	private async backoffAndAnnounce(retryAttempt: number, error: any): Promise<void> {
 		try {
 			const state = await this.providerRef.deref()?.getState()
-			const baseDelay = state?.requestDelaySeconds || 5
-
-			let exponentialDelay = Math.min(
-				Math.ceil(baseDelay * Math.pow(2, retryAttempt)),
-				MAX_EXPONENTIAL_BACKOFF_SECONDS,
-			)
-
-			// Respect provider rate limit window
-			let rateLimitDelay = 0
-			const rateLimit = (state?.apiConfiguration ?? this.apiConfiguration)?.rateLimitSeconds || 0
-			if (Task.lastGlobalApiRequestTime && rateLimit > 0) {
-				const elapsed = performance.now() - Task.lastGlobalApiRequestTime
-				rateLimitDelay = Math.ceil(Math.min(rateLimit, Math.max(0, rateLimit * 1000 - elapsed) / 1000))
-			}
+			let requestDelaySeconds = state?.requestDelaySeconds ?? 10
 
 			// Prefer RetryInfo on 429 if present
 			if (error?.status === 429) {
@@ -4930,13 +4978,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				)
 				const match = retryInfo?.retryDelay?.match?.(/^(\d+)s$/)
 				if (match) {
-					exponentialDelay = Number(match[1]) + 1
+					requestDelaySeconds = Number(match[1]) + 1
 				}
-			}
-
-			const finalDelay = Math.max(exponentialDelay, rateLimitDelay)
-			if (finalDelay <= 0) {
-				return
 			}
 
 			// Build header text; fall back to error message if none provided
@@ -4955,18 +4998,33 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 			headerText = headerText ? `${headerText}\n` : ""
 
-			// Show countdown timer with exponential backoff
-			for (let i = finalDelay; i > 0; i--) {
+			const lastMessage = this.clineMessages.at(-1)
+			const isUpdatingPreviousRetry = lastMessage?.say === "api_req_retry_delayed"
+
+			for (let i = requestDelaySeconds; i > 0; i--) {
 				// Check abort flag during countdown to allow early exit
 				if (this.abort) {
 					throw new Error(`[Task#${this.taskId}] Aborted during retry countdown`)
 				}
 
-				await this.say("api_req_retry_delayed", `${headerText}<retry_timer>${i}</retry_timer>`, undefined, true)
+				if (isUpdatingPreviousRetry) {
+					lastMessage.text = `${headerText}<retry_timer>${i}</retry_timer>`
+					lastMessage.partial = true
+					await this.updateClineMessage(lastMessage)
+				} else {
+					await this.say("api_req_retry_delayed", `${headerText}<retry_timer>${i}</retry_timer>`, undefined, true)
+				}
 				await delay(1000)
 			}
 
-			await this.say("api_req_retry_delayed", headerText, undefined, false)
+			if (isUpdatingPreviousRetry) {
+				lastMessage.text = headerText
+				lastMessage.partial = false
+				await this.saveClineMessages()
+				await this.updateClineMessage(lastMessage)
+			} else {
+				await this.say("api_req_retry_delayed", headerText, undefined, false)
+			}
 		} catch (err) {
 			console.error("Exponential backoff failed:", err)
 		}

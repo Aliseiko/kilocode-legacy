@@ -138,7 +138,9 @@ export async function readFileWithTokenBudget(
 							rl.close()
 							readStream.destroy()
 						} else if (!shouldClose) {
-							rl.resume()
+							if (!readStream.destroyed && (rl as any).closed !== true) {
+								rl.resume()
+							}
 						}
 					})
 					.catch((err) => {

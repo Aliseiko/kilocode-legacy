@@ -1,10 +1,10 @@
 {
-	"extension.displayName": "Kilo Code: AI Coding Agent, Copilot, and Autocomplete",
+	"extension.displayName": "Kilo Code v5: AI Coding Agent, Copilot, and Autocomplete",
 	"extension.description": "Open Source AI coding agent that generates code from natural language, automates tasks, and runs terminal commands. Features inline autocomplete, browser automation, automated refactoring, and custom modes for planning, coding, and debugging. Supports 500+ AI models including Claude (Anthropic), Gemini, Grok, GPT, Codex and GLM.",
-	"views.contextMenu.label": "Kilo Code",
-	"views.terminalMenu.label": "Kilo Code",
-	"views.activitybar.title": "Kilo Code",
-	"views.sidebar.name": "Kilo Code",
+	"views.contextMenu.label": "Kilo Code v5",
+	"views.terminalMenu.label": "Kilo Code v5",
+	"views.activitybar.title": "Kilo Code v5",
+	"views.sidebar.name": "Kilo Code v5",
 	"command.newTask.title": "New Task",
 	"command.prompts.title": "Modes",
 	"command.mcpServers.title": "MCP Servers",
@@ -25,11 +25,11 @@
 	"command.terminal.addToContext.title": "Add Terminal Content to Context",
 	"command.terminal.fixCommand.title": "Fix This Command",
 	"command.terminal.explainCommand.title": "Explain This Command",
-	"command.terminal.generateCommand.title": "Kilo Code: Generate Terminal Command",
+	"command.terminal.generateCommand.title": "Kilo Code v5: Generate Terminal Command",
 	"command.acceptInput.title": "Accept Input/Suggestion",
-	"command.generateCommitMessage.title": "Generate Commit Message with Kilo",
+	"command.generateCommitMessage.title": "Generate Commit Message with Kilo v5",
 	"command.profile.title": "Profile",
-	"configuration.title": "Kilo Code",
+	"configuration.title": "Kilo Code v5",
 	"command.toggleAutoApprove.title": "Toggle Auto-Approve",
 	"commands.allowedCommands.description": "Commands that can be auto-executed when 'Always approve execute operations' is enabled",
 	"commands.deniedCommands.description": "Command prefixes that will be automatically denied without asking for approval. In case of conflicts with allowed commands, the longest prefix match takes precedence. Add * to deny all commands.",
@@ -60,7 +60,6 @@
 	"autocomplete.commands.cancelSuggestions": "Cancel Suggested Edits",
 	"autocomplete.commands.applyCurrentSuggestion": "Apply Current Suggested Edit",
 	"autocomplete.commands.applyAllSuggestions": "Apply All Suggested Edits",
-
 	"autocomplete.commands.goToNextSuggestion": "Go To Next Suggestion",
 	"autocomplete.commands.goToPreviousSuggestion": "Go To Previous Suggestion"
 }

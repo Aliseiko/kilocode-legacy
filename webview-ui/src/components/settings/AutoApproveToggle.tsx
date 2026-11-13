@@ -13,6 +13,7 @@ type AutoApproveToggles = Pick<
 	| "alwaysAllowMcp"
 	| "alwaysAllowModeSwitch"
 	| "alwaysAllowSubtasks"
+	| "alwaysApproveResubmit"
 	| "alwaysAllowExecute"
 	| "alwaysAllowFollowupQuestions"
 >
@@ -78,6 +79,13 @@ export const autoApproveSettingsConfig: Record<AutoApproveSetting, AutoApproveCo
 		descriptionKey: "settings:autoApprove.subtasks.description",
 		icon: "list-tree",
 		testId: "always-allow-subtasks-toggle",
+	},
+	alwaysApproveResubmit: {
+		key: "alwaysApproveResubmit",
+		labelKey: "Retry",
+		descriptionKey: "Automatically retry requests when the model fails to provide a response or when a rate limit is reached",
+		icon: "refresh",
+		testId: "always-approve-resubmit-toggle",
 	},
 	alwaysAllowExecute: {
 		key: "alwaysAllowExecute",

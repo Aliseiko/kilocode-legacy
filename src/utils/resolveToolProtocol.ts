@@ -1,3 +1,5 @@
+import { Package } from '../shared/package'
+import * as vscode from "vscode"
 import { ToolProtocol, TOOL_PROTOCOL } from "@roo-code/types"
 import type { ProviderSettings } from "@roo-code/types"
 import type { Anthropic } from "@anthropic-ai/sdk"
@@ -39,9 +41,14 @@ export function resolveToolProtocol(
 		return lockedProtocol
 	}
 
+  const hasToolProtocol = vscode.workspace.getConfiguration(Package.name).get<string>("toolProtocol")
+  if (hasToolProtocol === 'native') {
+    return TOOL_PROTOCOL.NATIVE
+  }
+
 	// 2. Always return Native protocol for new tasks
 	// All models now support native tools; XML is deprecated
-	return TOOL_PROTOCOL.NATIVE
+	return TOOL_PROTOCOL.XML
 }
 
 /**

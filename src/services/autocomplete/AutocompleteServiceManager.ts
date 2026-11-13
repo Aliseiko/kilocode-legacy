@@ -10,6 +10,7 @@ import { ContextProxy } from "../../core/config/ContextProxy"
 import { TelemetryService } from "@roo-code/telemetry"
 import { ClineProvider } from "../../core/webview/ClineProvider"
 import { AutocompleteTelemetry } from "./classic-auto-complete/AutocompleteTelemetry"
+import { Package } from "../../shared/package"
 
 export class AutocompleteServiceManager {
 	private static _instance: AutocompleteServiceManager | null = null
@@ -357,7 +358,7 @@ export class AutocompleteServiceManager {
 		if (response === disableCopilot) {
 			await vscode.commands.executeCommand<any>("github.copilot.completions.disable")
 		} else if (response === disableInlineAssist) {
-			await vscode.commands.executeCommand<any>("kilo-code.autocomplete.disable")
+			await vscode.commands.executeCommand<any>(`${Package.name}.autocomplete.disable`)
 		}
 	}
 

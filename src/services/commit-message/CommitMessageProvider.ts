@@ -9,6 +9,7 @@ import { VSCodeCommitMessageAdapter } from "./adapters/VSCodeCommitMessageAdapte
 import { JetBrainsCommitMessageAdapter } from "./adapters/JetBrainsCommitMessageAdapter"
 import { VscGenerationRequest } from "./types"
 import { JetbrainsGenerationRequest } from "./types/jetbrains"
+import { Package } from "../../shared/package"
 
 /**
  * Orchestrates commit message generation by routing requests to appropriate adapters.
@@ -37,11 +38,12 @@ export class CommitMessageProvider implements vscode.Disposable {
 		this.outputChannel.appendLine(t("kilocode:commitMessage.activated"))
 
 		const disposables = [
-			vscode.commands.registerCommand("kilo-code.vsc.generateCommitMessage", (vsRequest?: VscGenerationRequest) =>
-				this.handleVSCodeCommand(vsRequest),
+			vscode.commands.registerCommand(
+				`${Package.name}.vsc.generateCommitMessage`,
+				(vsRequest?: VscGenerationRequest) => this.handleVSCodeCommand(vsRequest),
 			),
 			vscode.commands.registerCommand(
-				"kilo-code.jetbrains.generateCommitMessage",
+				`${Package.name}.jetbrains.generateCommitMessage`,
 				(...args: JetbrainsGenerationRequest): Promise<CommitMessageResult> => {
 					return this.handleJetBrainsCommand(...args)
 				},

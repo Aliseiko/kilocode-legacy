@@ -153,6 +153,7 @@ export const providerNames = [
 	"featherless",
 	"fireworks",
 	"gemini",
+	"gemini-cli",
 	"groq",
 	"mistral",
 	"moonshot",
@@ -165,6 +166,7 @@ export const providerNames = [
 	// kilocode_change start
 	"kilocode",
 	"minimax",
+	"gemini-cli",
 	"virtual-quota-fallback",
 	// Note: apertis, synthetic, inception are in dynamicProviders, no need to duplicate here
 	"synthetic",
@@ -386,6 +388,11 @@ const geminiSchema = apiModelIdProviderModelSchema.extend({
 	googleGeminiBaseUrl: z.string().optional(),
 	enableUrlContext: z.boolean().optional(),
 	enableGrounding: z.boolean().optional(),
+})
+
+const geminiCliSchema = apiModelIdProviderModelSchema.extend({
+	geminiCliOAuthPath: z.string().optional(),
+	geminiCliProjectId: z.string().optional(),
 })
 
 const openAiCodexSchema = apiModelIdProviderModelSchema.extend({
@@ -646,6 +653,7 @@ export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProv
 	xaiSchema.merge(z.object({ apiProvider: z.literal("xai") })),
 	ocaSchema.merge(z.object({ apiProvider: z.literal("oca") })), // kilocode_change
 	// kilocode_change start
+	geminiCliSchema.merge(z.object({ apiProvider: z.literal("gemini-cli") })),
 	apertisSchema.merge(z.object({ apiProvider: z.literal("apertis") })),
 	kilocodeSchema.merge(z.object({ apiProvider: z.literal("kilocode") })),
 	virtualQuotaFallbackSchema.merge(z.object({ apiProvider: z.literal("virtual-quota-fallback") })),
@@ -689,6 +697,7 @@ export const providerSettingsSchema = z.object({
 	...lmStudioSchema.shape,
 	...geminiSchema.shape,
 	// kilocode_change start
+	...geminiCliSchema.shape,
 	...apertisSchema.shape,
 	...kilocodeSchema.shape,
 	...virtualQuotaFallbackSchema.shape,
@@ -804,6 +813,7 @@ export const modelIdKeysByProvider: Record<TypicalProvider, ModelIdKey> = {
 	ollama: "ollamaModelId",
 	lmstudio: "lmStudioModelId",
 	gemini: "apiModelId",
+	"gemini-cli": "apiModelId",
 	mistral: "apiModelId",
 	moonshot: "apiModelId",
 	minimax: "apiModelId",
@@ -883,6 +893,7 @@ export const MODELS_BY_PROVIDER: Record<
 		| "openai"
 		| "openai-responses" // kilocode_change
 		| "gemini"
+    | "gemini-cli"
 	>,
 	{ id: ProviderName; label: string; models: string[] }
 > = {

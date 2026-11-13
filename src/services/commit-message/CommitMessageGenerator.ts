@@ -21,7 +21,7 @@ export class CommitMessageGenerator {
 	}
 
 	async generateMessage(params: GenerateMessageParams): Promise<string> {
-		const { gitContext, onProgress } = params
+		const { gitContext, additionalInstructions, onProgress } = params
 
 		try {
 			onProgress?.({
@@ -29,7 +29,7 @@ export class CommitMessageGenerator {
 				percentage: 75,
 			})
 
-			const generatedMessage = await this.callAIForCommitMessage(gitContext, onProgress)
+			const generatedMessage = await this.callAIForCommitMessage(gitContext, additionalInstructions, onProgress)
 
 			this.previousGitContext = gitContext
 			this.previousCommitMessage = generatedMessage
@@ -49,7 +49,7 @@ export class CommitMessageGenerator {
 	}
 
 	async buildPrompt(gitContext: string, options: PromptOptions): Promise<string> {
-		const { customSupportPrompts = {}, previousContext, previousMessage } = options
+		const { customSupportPrompts = {}, previousContext, previousMessage, additionalInstructions } = options
 
 		const customInstructions = await addCustomInstructions("", "", "", "commit", {
 			language: "en",
@@ -62,6 +62,12 @@ export class CommitMessageGenerator {
 			(previousMessage !== null || this.previousCommitMessage !== null)
 
 		const targetPreviousMessage = previousMessage || this.previousCommitMessage
+
+		let instructionContext = ""
+		if (additionalInstructions && additionalInstructions.trim() !== "") {
+			const isPreviousMessage = additionalInstructions.trim() === targetPreviousMessage?.trim()
+			if (!isPreviousMessage) instructionContext = additionalInstructions
+		}
 
 		if (shouldGenerateDifferentMessage && targetPreviousMessage) {
 			const differentMessagePrefix = `# CRITICAL INSTRUCTION: GENERATE A COMPLETELY DIFFERENT COMMIT MESSAGE
@@ -88,6 +94,7 @@ FINAL REMINDER: Your message MUST be COMPLETELY DIFFERENT from the previous mess
 				{
 					gitContext,
 					customInstructions: customInstructions || "",
+					additionalInstructions: instructionContext,
 				},
 				{
 					...customSupportPrompts,
@@ -100,6 +107,7 @@ FINAL REMINDER: Your message MUST be COMPLETELY DIFFERENT from the previous mess
 				{
 					gitContext,
 					customInstructions: customInstructions || "",
+					additionalInstructions: instructionContext,
 				},
 				customSupportPrompts,
 			)
@@ -108,6 +116,7 @@ FINAL REMINDER: Your message MUST be COMPLETELY DIFFERENT from the previous mess
 
 	private async callAIForCommitMessage(
 		gitContextString: string,
+		additionalInstructions?: string,
 		onProgress?: (progress: ProgressUpdate) => void,
 	): Promise<string> {
 		const contextProxy = ContextProxy.instance
@@ -143,7 +152,10 @@ FINAL REMINDER: Your message MUST be COMPLETELY DIFFERENT from the previous mess
 			Object.entries(customSupportPrompts).filter(([_, value]) => value !== undefined),
 		) as Record<string, string>
 
-		const prompt = await this.buildPrompt(gitContextString, { customSupportPrompts: filteredPrompts })
+		const prompt = await this.buildPrompt(gitContextString, {
+			customSupportPrompts: filteredPrompts,
+			additionalInstructions,
+		})
 
 		onProgress?.({
 			message: "Calling AI service...",

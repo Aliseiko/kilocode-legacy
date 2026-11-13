@@ -7,11 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>ai.kilocode.jetbrains</id>
+    <id>ai.kilocode.v5.jetbrains</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Kilo Code</name>
+    <name>Kilo Code v5</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor url="https://kilo.ai">Kilo Code</vendor>
@@ -24,8 +24,8 @@ SPDX-License-Identifier: Apache-2.0
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-        <h1>Kilo Code AI Agent</h1>
-        <p>Open Source AI coding assistant for planning, building, and fixing code.</p>
+        <h1>Kilo Code v5 AI Agent</h1>
+        <p>Standalone Kilo Code v5 AI coding assistant for planning, building, and fixing code.</p>
    ]]></description>
    
    <!-- Change notes for the plugin -->
@@ -36,84 +36,85 @@ SPDX-License-Identifier: Apache-2.0
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="jcef.xml">com.intellij.modules.jcef</depends>
     <depends>org.jetbrains.plugins.terminal</depends>
     
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="ai.kilocode.jetbrains.plugin.WecoderPluginService"/>
-        <jbProtocolCommand implementation="ai.kilocode.jetbrains.commands.KiloCodeAuthProtocolCommand" />
-        <postStartupActivity implementation="ai.kilocode.jetbrains.plugin.WecoderPlugin"/>
-        <editorFactoryListener implementation="ai.kilocode.jetbrains.editor.EditorListener"/>
-        <toolWindow factoryClass="ai.kilocode.jetbrains.ui.RooToolWindowFactory"
-                    id="Kilo Code"
+        <projectService serviceImplementation="ai.kilocode.v5.jetbrains.plugin.WecoderPluginService"/>
+        <jbProtocolCommand implementation="ai.kilocode.v5.jetbrains.commands.KiloCodeAuthProtocolCommand" />
+        <postStartupActivity implementation="ai.kilocode.v5.jetbrains.plugin.WecoderPlugin"/>
+        <editorFactoryListener implementation="ai.kilocode.v5.jetbrains.editor.EditorListener"/>
+        <toolWindow factoryClass="ai.kilocode.v5.jetbrains.ui.RooToolWindowFactory"
+                    id="Kilo Code v5"
                     secondary="true"
                     icon="/icons/kilo-dark.svg"
                     anchor="right" />
         <notificationGroup
-                    id="kilocode"
+                    id="kilocode-v5"
                     displayType="BALLOON"
         />
-        <checkinHandlerFactory implementation="ai.kilocode.jetbrains.git.CommitMessageHandlerFactory"/>
-        <applicationService serviceImplementation="ai.kilocode.jetbrains.git.CommitMessageService"/>
-        <applicationService serviceImplementation="ai.kilocode.jetbrains.inline.InlineCompletionService"/>
+        <checkinHandlerFactory implementation="ai.kilocode.v5.jetbrains.git.CommitMessageHandlerFactory"/>
+        <applicationService serviceImplementation="ai.kilocode.v5.jetbrains.git.CommitMessageService"/>
+        <applicationService serviceImplementation="ai.kilocode.v5.jetbrains.inline.InlineCompletionService"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.jetbrains.plugins.terminal">
-        <localTerminalCustomizer implementation="ai.kilocode.jetbrains.terminal.WeCoderTerminalCustomizer"/>
+        <localTerminalCustomizer implementation="ai.kilocode.v5.jetbrains.terminal.WeCoderTerminalCustomizer"/>
     </extensions>
 
     <actions>
-        <action id="kilocode.plusButtonClicked"
+        <action id="kilocode-v5.plusButtonClicked"
                 icon="AllIcons.General.Add"
-                class="ai.kilocode.jetbrains.actions.PlusButtonClickAction"
+                class="ai.kilocode.v5.jetbrains.actions.PlusButtonClickAction"
                 text="New Task"
                 description="New task">
             <override-text place="GoToAction" text="New Task" />
         </action>
 
-        <action id="kilocode.historyButtonClicked"
+        <action id="kilocode-v5.historyButtonClicked"
                 icon="AllIcons.Vcs.History"
-                class="ai.kilocode.jetbrains.actions.HistoryButtonClickAction"
+                class="ai.kilocode.v5.jetbrains.actions.HistoryButtonClickAction"
                 text="History"
                 description="History">
             <override-text place="GoToAction" text="History" />
         </action>
 
-        <action id="kilocode.profileButtonClicked"
+        <action id="kilocode-v5.profileButtonClicked"
                 icon="AllIcons.General.User"
-                class="ai.kilocode.jetbrains.actions.ProfileButtonClickAction"
+                class="ai.kilocode.v5.jetbrains.actions.ProfileButtonClickAction"
                 text="Profile"
                 description="Profile">
             <override-text place="GoToAction" text="Profile" />
         </action>
 
-        <action id="kilocode.settingsButtonClicked"
+        <action id="kilocode-v5.settingsButtonClicked"
                 icon="AllIcons.General.Settings"
-                class="ai.kilocode.jetbrains.actions.SettingsButtonClickAction"
+                class="ai.kilocode.v5.jetbrains.actions.SettingsButtonClickAction"
                 text="Settings"
                 description="Setting">
             <override-text place="GoToAction" text="Setting" />
         </action>
 
-        <action id="kilocode.generateCommitMessage"
+        <action id="kilocode-v5.generateCommitMessage"
                 icon="/icons/kilo-dark-small.svg"
-                class="ai.kilocode.jetbrains.actions.GitCommitMessageAction"
-                text="Generate Commit Message"
+                class="ai.kilocode.v5.jetbrains.actions.GitCommitMessageAction"
+                text="Generate Commit Message (v5)"
                 description="Generate AI-powered commit message">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
         </action>
 
-        <group id="WecoderToolbarGroup">
-            <reference ref="kilocode.plusButtonClicked" />
-            <reference ref="kilocode.historyButtonClicked" />
-            <reference ref="kilocode.profileButtonClicked" />
-            <reference ref="kilocode.settingsButtonClicked" />
+        <group id="WecoderV5ToolbarGroup">
+            <reference ref="kilocode-v5.plusButtonClicked" />
+            <reference ref="kilocode-v5.historyButtonClicked" />
+            <reference ref="kilocode-v5.profileButtonClicked" />
+            <reference ref="kilocode-v5.settingsButtonClicked" />
         </group>
 
-        <group id="kilocode.RightClickMenu" text="Kilo Code" description="kilocode main menu"  icon="/icons/kilo-dark-small.svg" popup="true">
-            <group id="kilocode.RightClick.Chat" class="ai.kilocode.jetbrains.actions.RightClickChatActionGroup"
-                   text="Chat" description="kilocode chat tool"/>
+        <group id="kilocode-v5.RightClickMenu" text="Kilo Code v5" description="kilocode v5 main menu" icon="/icons/kilo-dark-small.svg" popup="true">
+            <group id="kilocode-v5.RightClick.Chat" class="ai.kilocode.v5.jetbrains.actions.RightClickChatActionGroup"
+                   text="Chat" description="kilocode v5 chat tool"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </group>
     </actions>

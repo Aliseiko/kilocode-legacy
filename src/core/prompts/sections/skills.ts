@@ -11,6 +11,30 @@ function escapeXml(value: string): string {
 		.replace(/'/g, "&apos;")
 }
 
+export function getSkills(
+  skillsManager: SkillsManagerLike | undefined,
+  currentMode: string | undefined
+): string {
+  if (!skillsManager || !currentMode) return '';
+
+  // Get skills filtered by current mode (with override resolution)
+  const skills = skillsManager.getSkillsForMode(currentMode);
+  if (skills.length === 0) return '';
+
+  const skillsXml = skills
+    .map((skill) => {
+      const name = escapeXml(skill.name);
+      const description = escapeXml(skill.description);
+      // Per the Agent Skills integration guidance for filesystem-based agents,
+      // location should be an absolute path to the SKILL.md file.
+      const location = escapeXml(skill.path);
+      return `  <skill>\n    <name>${name}</name>\n    <description>${description}</description>\n    <location>${location}</location>\n  </skill>`;
+    })
+    .join('\n');
+
+  return `<available_skills>\n${skillsXml}\n</available_skills>`;
+}
+
 /**
  * Generate the skills section for the system prompt.
  * Only includes skills relevant to the current mode.
@@ -23,30 +47,14 @@ export async function getSkillsSection(
 	skillsManager: SkillsManagerLike | undefined,
 	currentMode: string | undefined,
 ): Promise<string> {
-	if (!skillsManager || !currentMode) return ""
-
-	// Get skills filtered by current mode (with override resolution)
-	const skills = skillsManager.getSkillsForMode(currentMode)
-	if (skills.length === 0) return ""
-
-	const skillsXml = skills
-		.map((skill) => {
-			const name = escapeXml(skill.name)
-			const description = escapeXml(skill.description)
-			// Per the Agent Skills integration guidance for filesystem-based agents,
-			// location should be an absolute path to the SKILL.md file.
-			const location = escapeXml(skill.path)
-			return `  <skill>\n    <name>${name}</name>\n    <description>${description}</description>\n    <location>${location}</location>\n  </skill>`
-		})
-		.join("\n")
+  const skillsXml = getSkills(skillsManager, currentMode)
+  if (!skillsXml) return ""
 
 	return `====
 
 AVAILABLE SKILLS
 
-<available_skills>
 ${skillsXml}
-</available_skills>
 
 <mandatory_skill_check>
 REQUIRED PRECONDITION

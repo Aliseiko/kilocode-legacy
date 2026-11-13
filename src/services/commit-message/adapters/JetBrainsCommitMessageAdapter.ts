@@ -14,6 +14,7 @@ export class JetBrainsCommitMessageAdapter implements ICommitMessageAdapter {
 
 	async generateCommitMessage(request: CommitMessageRequest): Promise<CommitMessageResult> {
 		const integration: ICommitMessageIntegration = {
+			getCommitInputValue: async () => undefined,
 			// JetBrains doesn't need progress reporting or messages - handled externally
 			// Just need to handle the final result
 			handleResult: async (result: CommitMessageResult) => {

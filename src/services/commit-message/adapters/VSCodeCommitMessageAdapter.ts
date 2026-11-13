@@ -48,6 +48,10 @@ export class VSCodeCommitMessageAdapter implements ICommitMessageAdapter {
 							await method(message)
 						},
 
+						getCommitInputValue: async () => {
+							return this.targetRepository?.inputBox.value
+						},
+
 						handleResult: async (result: CommitMessageResult) => {
 							if (result.message && this.targetRepository) {
 								this.targetRepository.inputBox.value = result.message

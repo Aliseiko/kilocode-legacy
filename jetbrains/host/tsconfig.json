@@ -2,6 +2,10 @@
 	// This is the configuration for plugins/base independent project, compiled separately from the outer project
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"vs/*": ["./deps/vscode/vs/*"]
+		},
 		"module": "NodeNext",
 		"esModuleInterop": true,
 		"removeComments": false,

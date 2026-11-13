@@ -131,7 +131,9 @@ export async function countFileLinesAndTokens(
 					.then(() => {
 						isProcessing = false
 						if (!shouldClose) {
-							rl.resume()
+							if (!readStream.destroyed && (rl as any).closed !== true) {
+								rl.resume()
+							}
 						}
 					})
 					.catch((err) => {

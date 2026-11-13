@@ -212,8 +212,7 @@ function checkVscodeSubmodule() {
 		if (result !== null) {
 			printFix("VSCode submodule initialized successfully")
 		} else {
-			printError("Failed to initialize VSCode submodule")
-			return false
+			printWarning("VSCode submodule initialization skipped (standalone workspace)")
 		}
 	} else {
 		printSuccess("VSCode submodule is initialized")
@@ -224,10 +223,7 @@ function checkVscodeSubmodule() {
 	if (fs.existsSync(expectedFile)) {
 		printSuccess("VSCode submodule contains expected files")
 	} else {
-		printError("VSCode submodule appears to be incomplete")
-		console.log(`  Expected file: ${expectedFile}`)
-		console.log("  Try: git submodule update --init --recursive --force")
-		return false
+		printWarning("VSCode submodule is not initialized (standalone directory mode)")
 	}
 
 	return true
@@ -309,12 +305,13 @@ function checkBuildSystem() {
 	const gradlew = path.join(pluginDir, process.platform === "win32" ? "gradlew.bat" : "gradlew")
 	const buildGradle = path.join(pluginDir, "build.gradle.kts")
 	const gradleProps = path.join(pluginDir, "gradle.properties")
+	const gradlePropsTemplate = path.join(pluginDir, "gradle.properties.template")
 
-	if (fs.existsSync(gradlew) && fs.existsSync(buildGradle) && fs.existsSync(gradleProps)) {
+	if (fs.existsSync(gradlew) && fs.existsSync(buildGradle) && (fs.existsSync(gradleProps) || fs.existsSync(gradlePropsTemplate))) {
 		printSuccess("Gradle build system is configured")
 	} else {
 		printError("Gradle build system files are missing")
-		console.log("  Missing files: gradlew, build.gradle.kts, or gradle.properties")
+		console.log("  Missing files: gradlew, build.gradle.kts, or gradle.properties/template")
 		return false
 	}
 

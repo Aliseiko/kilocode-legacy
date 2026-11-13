@@ -24,6 +24,7 @@ export type AutoApprovalState =
 	| "alwaysAllowSubtasks"
 	| "alwaysAllowExecute"
 	| "alwaysAllowFollowupQuestions"
+	| "alwaysApproveResubmit"
 
 // Some of these actions have additional settings associated with them.
 export type AutoApprovalStateOptions =
